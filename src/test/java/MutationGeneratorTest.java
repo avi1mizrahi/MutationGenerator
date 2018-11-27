@@ -1,58 +1,76 @@
-import spoon.Launcher;
-import spoon.processing.Processor;
-import spoon.reflect.CtModel;
-import spoon.reflect.declaration.CtElement;
-import spoon.reflect.visitor.filter.TypeFilter;
-import spoon.support.compiler.SpoonProgress;
+import com.github.javaparser.JavaParser;
+import com.github.javaparser.ParserConfiguration;
+import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.body.MethodDeclaration;
+import org.apache.commons.io.FileUtils;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import javax.annotation.processing.AbstractProcessor;
+import java.io.File;
 import java.io.IOException;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.lang.reflect.Method;
+import java.nio.file.Path;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 class MutationGeneratorTest {
+    public static final String INPUT_DIR = "src/test/cases";
+//    public static final String INPUT_DIR = "src/test/cases/temp";
+//    public static final String INPUT_DIR = "/Users/mizrahi/Code2VecProject/java-small/training/intellij-community";
+    public static final String OUTPUT_DIR = "src/test/outputs";
 
-    public static final String METHOD_PATH = "src/test/cases/T1.java";
-    public static final String TEST_FILE_PATH = "src/test/cases/ColumnFamilyMetricTest.java";
+    @BeforeEach
+    void setUp() {
+        deleteOutputDir();
+    }
 
-    static String readFile(String path) {
-        byte[] encoded = new byte[0];
+    private static void deleteOutputDir() {
         try {
-            encoded = Files.readAllBytes(Paths.get(path));
+            FileUtils.deleteDirectory(new File(OUTPUT_DIR));
+        } catch (IOException e) {
+        }
+    }
+
+    @Test
+    void main2() {
+        assertDoesNotThrow(() ->
+        MutationGenerator.main(new String[]{
+                "--input-dir", INPUT_DIR,
+                "--output-dir", OUTPUT_DIR
+        }));
+    }
+
+    final static String bad_code = "" +
+            "class AsId <T extends HasId<? super T>> implements Id<T> {}\n" +
+            "interface HasId<T extends HasId<T>> {}\n" +
+            "interface Id<T extends HasId<? super T>>{}\n" +
+            "\n" +
+            "interface Pong<T> {}\n" +
+            "class Ping<T> implements Pong<Pong<? super Ping<Ping<T>>>> {\n" +
+            "  static void Ping() {\n" +
+            "    Pong<? super Ping<Long>> Ping = new Ping<Long>();\n" +
+            "  }\n" +
+            "}\n";
+
+    @Test
+    void main() {
+        CompilationUnit parsed = null;
+        System.out.println(System.getenv("PWD"));
+        try {
+            parsed = JavaParser.parse(new File(INPUT_DIR + "/T1.java"));
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return new String(encoded);
+
+        try {
+            System.out.println(parsed.findAll(MethodDeclaration.class));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        System.out.println("ALL GOOD");
+//		for (Object o : parsed.getParentNodeOfType(MethodContent.class)) {
+//			System.out.println(o);
+//		}
     }
 
-    public static void main(String[] args) {
-
-        var l = new Launcher();
-        l.addInputResource(METHOD_PATH);
-
-//        var cl = Launcher.parseClass(readFile(METHOD_PATH));
-//        System.out.println("!!!!\n" + cl);
-//        OneByOneMutator mp = new CommutativeExprMutator();
-//        mp.setFactory(cl.getFactory());
-//        mp.init();
-//
-//        for (var o : cl.getElements(new TypeFilter<>(mp.getElementType()))) {
-//            System.out.println(o);
-//            if (mp.isToBeProcessed((CtElement) o)) {
-//                mp.process((CtElement)o);
-//            }
-//        }
-//
-//        mp.processingDone();
-
-        var model = l.buildModel();
-
-//        var es = model.getElements(element -> true);
-//        System.out.println(es);
-
-//        model.processWith(new LiteralMutator());
-//        model.processWith(new RenameMutator());
-        model.processWith(new CommutativeExprMutator());
-    }
 }

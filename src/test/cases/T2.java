@@ -1,22 +1,11 @@
-public class TEST {
-    public int foo() {
-        int local1 = 42;
-        int b = 23;
 
-        return 43 + local1 * (b + 1) - b / 33;
-    }
+class AsId <T extends HasId<? super T>> implements Id<T> {}
+interface HasId<T extends HasId<T>> {}
+interface Id<T extends HasId<? super T>>{}
 
-    public int bar(int param1, String param2) {
-        int local1 = 42;
-        int local2 = 2018;
-        float fl = 4.3;
-
-        functionCall(param2, fl, 5.3, 67, "string");
-
-        if (param1 > 1234 && param1 <= 4567)
-            var temp = returnObject(local1).thenInvokeMethod().andAnotherOne(local2);
-
-        local1 = 64 / param1;
-        return local1 + param1;
-    }
+interface Pong<T> {}
+class Ping<T> implements Pong<Pong<? super Ping<Ping<T>>>> {
+  static void Ping() {
+    Pong<? super Ping<Long>> Ping = new Ping<Long>();
+  }
 }
