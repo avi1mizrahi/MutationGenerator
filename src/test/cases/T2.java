@@ -13,9 +13,9 @@ public class TEST {
 
         functionCall(param2, fl, 5.3, 67, "string");
 
-        if (param1 > 1234 && param1 <= 4567) {
+        if (param1 > 1234 && param1 <= 4567)
             var temp = returnObject(local1).thenInvokeMethod().andAnotherOne(local2);
-        }
+
         local1 = 64 / param1;
         return local1 + param1;
     }
