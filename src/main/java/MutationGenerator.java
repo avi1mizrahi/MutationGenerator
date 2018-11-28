@@ -1,55 +1,54 @@
+import com.github.javaparser.JavaParser;
+import com.github.javaparser.ParseProblemException;
+import com.github.javaparser.ast.CompilationUnit;
 import org.kohsuke.args4j.CmdLineException;
-import spoon.Launcher;
-import spoon.reflect.CtModel;
-import spoon.reflect.declaration.CtMethod;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 
 class MutationGenerator {
 
     public static void main(String[] args) throws CmdLineException {
-        CommandLineParameters commandLineParameters = null;
+        CommandLineParameters commandLineParameters;
 
         commandLineParameters = new CommandLineParameters(args);
 
-        final File[] files = commandLineParameters.inputDirectory.listFiles(
-                pathname -> pathname.isFile() && pathname.getName().toLowerCase().endsWith(".java"));
+        // TODO: add mutators by command line params
+        List<SequentialMutator> mutators = new ArrayList<>();
+//        mutators.add(new SequentialMutator(new LiteralMutator()));
+        mutators.add(new SequentialMutator(new CommutativeExprMutator()));
+        mutators.add(new SequentialMutator(new RenameMutator(name -> new ArrayList<>(List.of("newName1", "b")))));
 
-        int faildToBuilt = 0;
+        final File[] files = Objects.requireNonNull(commandLineParameters.inputDirectory.listFiles(
+                pathname -> pathname.isFile() && pathname.getName().toLowerCase().endsWith(".java")));
+
+        int nFailed = 0;
 
         for (var file : files) {
             System.out.println("FILE: " + file.getPath());
-            var launcher = new Launcher();
-            launcher.addInputResource(file.getPath());
-            launcher.getEnvironment().setNoClasspath(true);
-            launcher.getEnvironment().setComplianceLevel(10);
 
-            CtModel model;
+            CompilationUnit unit;
             try {
-                model = launcher.buildModel();
-            } catch (Exception e) {
-                faildToBuilt++;
+                unit = JavaParser.parse(file);
+            } catch (ParseProblemException | FileNotFoundException e) {
+                nFailed++;
+                e.printStackTrace();
                 continue;
             }
 
-            // TODO: add by command line params
-            List<OneByOneMutator> mutators = new ArrayList<>();
-            mutators.add(new CommutativeExprMutator());
-
             for (var mutator : mutators) {
-                model.processWith(mutator);
-                List<CtMethod> methods = mutator.getMutatedMethods();
-                // TODO: write them to file
-//                for (var method : methods) {
-//                    System.out.println(method.getSimpleName());
-//                }
-            }
+                final List<String> mutations = mutator.process(unit);
+                if (!mutations.isEmpty()) System.out.println("================================");
 
+                // TODO: write them to file
+                mutations.forEach((System.out::println));
+            }
         }
 
-        System.out.println("Failed=" + faildToBuilt);
+        System.out.println("Failed=" + nFailed);
     }
 }

@@ -1,76 +1,82 @@
-import spoon.reflect.code.BinaryOperatorKind;
-import spoon.reflect.code.CtBinaryOperator;
-import spoon.reflect.code.CtExpression;
+import com.github.javaparser.ast.body.MethodDeclaration;
+import com.github.javaparser.ast.expr.BinaryExpr;
+import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 
-public class CommutativeExprMutator extends OneByOneMutator<CtBinaryOperator<?>> {
-    private CtExpression lhs;
-    private CtExpression rhs;
-    private BinaryOperatorKind operatorKind;
+import java.util.ArrayList;
+import java.util.List;
 
-    private static boolean isCommutative(CtBinaryOperator binaryOperator) {
-        switch (binaryOperator.getKind()) {
+public class CommutativeExprMutator implements MethodMutationGenerator {
+    private static boolean isCommutative(BinaryExpr.Operator binaryOperator) {
+        switch (binaryOperator) {
             case OR:
             case AND:
-            case BITOR:
-            case BITXOR:
-            case BITAND:
-            case EQ:
-            case NE:
+            case BINARY_OR:
+            case BINARY_AND:
+            case XOR:
+            case EQUALS:
+            case NOT_EQUALS:
             case PLUS:
-            case MUL:
+            case MULTIPLY:
                 return true;
         }
         return false;
     }
 
-    private static boolean isFlippableComparator(CtBinaryOperator binaryOperator) {
-        return getFlippedComparator(binaryOperator.getKind()) != null;
+    private static boolean isFlippableComparator(BinaryExpr.Operator binaryOperator) {
+        return getFlippedComparator(binaryOperator) != null;
     }
 
-    private static void flipComparator(CtBinaryOperator binaryOperator) {
-        binaryOperator.setKind(getFlippedComparator(binaryOperator.getKind()));
+    private static void flipComparator(BinaryExpr binaryExpr) {
+        binaryExpr.setOperator(getFlippedComparator(binaryExpr.getOperator()));
     }
 
-    private static BinaryOperatorKind getFlippedComparator(BinaryOperatorKind binaryOperatorKind) {
-        switch (binaryOperatorKind) {
-            case LT:
-                return BinaryOperatorKind.GT;
-            case GT:
-                return BinaryOperatorKind.LT;
-            case LE:
-                return BinaryOperatorKind.GE;
-            case GE:
-                return BinaryOperatorKind.LE;
+    private static BinaryExpr.Operator getFlippedComparator(BinaryExpr.Operator binaryOperator) {
+        if (isCommutative(binaryOperator))
+            return binaryOperator;
+
+        switch (binaryOperator) {
+            case LESS:
+                return BinaryExpr.Operator.GREATER;
+            case GREATER:
+                return BinaryExpr.Operator.LESS;
+            case LESS_EQUALS:
+                return BinaryExpr.Operator.GREATER_EQUALS;
+            case GREATER_EQUALS:
+                return BinaryExpr.Operator.LESS_EQUALS;
         }
         return null;
     }
 
     @Override
-    public void doMutation(CtBinaryOperator<?> op) {
-        lhs = op.getLeftHandOperand();
-        rhs = op.getRightHandOperand();
-        operatorKind = op.getKind();
-        op.setRightHandOperand(lhs);
-        op.setLeftHandOperand(rhs);
-        if (isFlippableComparator(op))
-            flipComparator(op);
-    }
+    public List<String> process(MethodDeclaration method) {
+        List<String> mutations = new ArrayList<>();
 
-    @Override
-    public void undoMutation(CtBinaryOperator<?> op) {
-        op.setRightHandOperand(rhs);
-        op.setLeftHandOperand(lhs);
-        op.setKind(operatorKind);
-    }
+        method.accept(new VoidVisitorAdapter<Void>() {
+            @Override
+            public void visit(BinaryExpr n, Void arg) {
+                super.visit(n, arg);
 
-    @Override
-    public Class getElementType() {
-        return CtBinaryOperator.class;
-    }
+                final var op = n.getOperator();
 
-    @Override
-    public boolean isToBeProcessed(CtBinaryOperator candidate) {
-        return super.isToBeProcessed(candidate) && (isCommutative(candidate) || isFlippableComparator(candidate));
-    }
+                if (!isFlippableComparator(op)) {
+                    return;
+                }
 
+                final var left = n.getLeft();
+                final var right = n.getRight();
+
+                n.setLeft(right);
+                n.setRight(left);
+                flipComparator(n);
+
+                mutations.add(method.toString());
+
+                n.setLeft(left);
+                n.setRight(right);
+                n.setOperator(op);
+            }
+        }, null);
+
+        return mutations;
+    }
 }

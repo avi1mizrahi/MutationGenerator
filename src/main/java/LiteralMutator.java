@@ -1,27 +1,25 @@
-import spoon.reflect.code.CtLiteral;
+import com.github.javaparser.ast.body.MethodDeclaration;
+import com.github.javaparser.ast.expr.IntegerLiteralExpr;
+import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 
-public class LiteralMutator extends OneByOneMutator<CtLiteral<Integer>> {
-    private Integer originalValue;
+import java.util.ArrayList;
+import java.util.List;
 
+public class LiteralMutator implements MethodMutationGenerator {
     @Override
-    public boolean isToBeProcessed(CtLiteral candidate) {
-        return super.isToBeProcessed(candidate) &&
-                candidate.getType().getSimpleName().equals("int"); // TODO: this is bad! (string comparison);
-    }
+    public List<String> process(MethodDeclaration method) {
+        List<String> mutations = new ArrayList<>();
 
-    @Override
-    public Class getElementType() {
-        return CtLiteral.class;
-    }
+        method.accept(new VoidVisitorAdapter<Void>() {
+            @Override
+            public void visit(IntegerLiteralExpr n, Void arg) {
+                var old = n.asInt();// TODO: there is a bug here I think. Try parsing big int
+                n.setInt(404040404);
+                mutations.add(method.toString());
+                n.setInt(old);
+            }
+        }, null);
 
-    @Override
-    public void doMutation(CtLiteral<Integer> element) {
-        originalValue = element.getValue();
-        element.setValue(55);
-    }
-
-    @Override
-    public void undoMutation(CtLiteral<Integer> element) {
-        element.setValue(originalValue);
+        return mutations;
     }
 }

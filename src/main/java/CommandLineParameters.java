@@ -4,7 +4,7 @@ import org.kohsuke.args4j.Option;
 
 import java.io.File;
 
-public class CommandLineParameters {
+class CommandLineParameters {
 
     private final CmdLineParser parser;
     public File inputDirectory = null;
