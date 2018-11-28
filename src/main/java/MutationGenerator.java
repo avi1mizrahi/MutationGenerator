@@ -13,15 +13,18 @@ import java.util.Objects;
 class MutationGenerator {
 
     public static void main(String[] args) throws CmdLineException {
-        CommandLineParameters commandLineParameters;
+        new MutationGenerator(new CommandLineParameters(args));
+    }
 
-        commandLineParameters = new CommandLineParameters(args);
-
+    MutationGenerator(CommandLineParameters commandLineParameters) {
         List<CuMutationProcessor> mutators = new ArrayList<>();
-        // TODO: add mutators by command line params
-//        mutators.add(new SequentialMutator(new LiteralMutator()));
-        mutators.add(new SequentialMutator(new BinaryExprMutator()));
-        mutators.add(new SequentialMutator(new RenameMutator(name -> new ArrayList<>(List.of("newName1", "b")))));
+
+        if (commandLineParameters.flipBinaryExpr) {
+            mutators.add(new SequentialMutationProcessor(new BinaryExprMutator()));
+        }
+        if (commandLineParameters.renameVariable) {
+            mutators.add(new SequentialMutationProcessor(new RenameMutator(name -> new ArrayList<>(List.of("newName1", "b")))));
+        }
 
         final File[] files = Objects.requireNonNull(commandLineParameters.inputDirectory.listFiles(
                 pathname -> pathname.isFile() && pathname.getName().toLowerCase().endsWith(".java")));
