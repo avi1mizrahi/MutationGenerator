@@ -31,22 +31,26 @@ class CommandLineParametersTest {
         var exception = assertThrows(CmdLineException.class,
                 () -> new CommandLineParameters(
                         "--input-dir", BAD_PATH,
-                        "--output-dir", INPUT_DIR
+                        "--output-dir", INPUT_DIR,
+                        "--flip-binary-expr"
                 ));
-        assertEquals("no such input directory", exception.getMessage());
+        assertEquals("No such input directory", exception.getMessage());
 
         exception = assertThrows(CmdLineException.class,
                 () -> new CommandLineParameters(
                         "--input-dir", NOT_A_DIR,
-                        "--output-dir", INPUT_DIR
+                        "--output-dir", INPUT_DIR,
+                        "--flip-binary-expr"
                 ));
-        assertEquals("no such input directory", exception.getMessage());
+        assertEquals("No such input directory", exception.getMessage());
 
         exception = assertThrows(CmdLineException.class,
                 () -> new CommandLineParameters(
                         "--input-dir", INPUT_DIR,
-                        "--output-dir", NOT_A_DIR));
-        assertEquals("no such output directory", exception.getMessage());
+                        "--output-dir", NOT_A_DIR,
+                        "--flip-binary-expr"
+                ));
+        assertEquals("No such output directory", exception.getMessage());
     }
 
     @Test
@@ -54,6 +58,27 @@ class CommandLineParametersTest {
         assertDoesNotThrow(() ->
                 new CommandLineParameters(
                         "--input-dir", INPUT_DIR,
-                        "--output-dir", OUTPUT_DIR));
+                        "--output-dir", OUTPUT_DIR,
+                        "--flip-binary-expr"
+                ));
+    }
+
+    @Test
+    void mutationFlag() {
+        var exception = assertThrows(CmdLineException.class,
+                () -> new CommandLineParameters(
+                        "--input-dir", INPUT_DIR,
+                        "--output-dir", OUTPUT_DIR
+                ));
+        assertEquals("No mutation was chosen", exception.getMessage());
+
+        var cmd = assertDoesNotThrow(() ->
+                new CommandLineParameters(
+                        "--input-dir", INPUT_DIR,
+                        "--output-dir", OUTPUT_DIR,
+                        "--flip-binary-expr"
+                ));
+        assertTrue(cmd.flipBinaryExpr);
+        assertFalse(cmd.renameVariable);
     }
 }

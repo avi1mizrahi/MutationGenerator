@@ -37,6 +37,8 @@ class CommandLineParameters {
             checkInputDirectory();
             checkOutputDirectory();
 
+            checkMutations();
+
         } catch (CmdLineException e) {
             System.err.println(e.getMessage());
             parser.printUsage(System.err);
@@ -44,18 +46,28 @@ class CommandLineParameters {
         }
     }
 
+    private void checkMutations() throws CmdLineException {
+        if (!flipBinaryExpr && !renameVariable) {
+            error("No mutation was chosen");
+        }
+    }
+
     private void checkInputDirectory() throws CmdLineException {
         if (!inputDirectory.exists() || !inputDirectory.isDirectory())
-            throw new CmdLineException(parser, "no such input directory", new Throwable());
+            error("No such input directory");
     }
 
     private void checkOutputDirectory() throws CmdLineException {
         if (outputDirectory.exists()) {
             if (!outputDirectory.isDirectory())
-                throw new CmdLineException(parser, "no such output directory", new Throwable());
+                error("No such output directory");
         } else {
             if (!outputDirectory.mkdirs())
-                throw new CmdLineException(parser, "can't create output directory", new Throwable());
+                error("can't create output directory");
         }
+    }
+
+    private void error(String message) throws CmdLineException {
+        throw new CmdLineException(parser, message, new Throwable());
     }
 }
