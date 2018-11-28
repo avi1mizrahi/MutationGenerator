@@ -15,7 +15,7 @@ interface NameGenerator {
  * - 100% precision, i.e. if a rename took place, the semantics is preserved
  * - Some renames will be missed as may be valid because of variable/field hiding etc.
  */
-public class RenameMutator implements MethodMutationGenerator {
+public class RenameMutator implements MethodMutationProcessor {
     private final NameGenerator nameGenerator;
 
     RenameMutator(NameGenerator nameGenerator) {

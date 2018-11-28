@@ -17,8 +17,8 @@ class MutationGenerator {
 
         commandLineParameters = new CommandLineParameters(args);
 
+        List<CuMutationProcessor> mutators = new ArrayList<>();
         // TODO: add mutators by command line params
-        List<SequentialMutator> mutators = new ArrayList<>();
 //        mutators.add(new SequentialMutator(new LiteralMutator()));
         mutators.add(new SequentialMutator(new BinaryExprMutator()));
         mutators.add(new SequentialMutator(new RenameMutator(name -> new ArrayList<>(List.of("newName1", "b")))));

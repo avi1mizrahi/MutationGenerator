@@ -5,18 +5,15 @@ import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 import java.util.ArrayList;
 import java.util.List;
 
-interface MethodMutationGenerator {
-    List<String> process(MethodDeclaration method);
-}
+class SequentialMutationProcessor implements CuMutationProcessor {
+    private final MethodMutationProcessor mutator;
 
-class SequentialMutator {
-    private final MethodMutationGenerator mutator;
-
-    SequentialMutator(MethodMutationGenerator mutator) {
+    SequentialMutationProcessor(MethodMutationProcessor mutator) {
         this.mutator = mutator;
     }
 
-    List<String> process(CompilationUnit compilationUnit) {
+    @Override
+    public List<String> process(CompilationUnit compilationUnit) {
         final ArrayList<String> mutations = new ArrayList<>();
 
         compilationUnit.accept(new VoidVisitorAdapter<Void>() {

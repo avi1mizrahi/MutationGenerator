@@ -5,7 +5,8 @@ import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 import java.util.ArrayList;
 import java.util.List;
 
-public class BinaryExprMutator implements MethodMutationGenerator {
+public class BinaryExprMutator implements MethodMutationProcessor {
+
     private static boolean isCommutative(BinaryExpr.Operator binaryOperator) {
         switch (binaryOperator) {
             case OR:

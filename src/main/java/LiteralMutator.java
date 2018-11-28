@@ -5,7 +5,7 @@ import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 import java.util.ArrayList;
 import java.util.List;
 
-public class LiteralMutator implements MethodMutationGenerator {
+public class LiteralMutator implements MethodMutationProcessor {
     @Override
     public List<String> process(MethodDeclaration method) {
         List<String> mutations = new ArrayList<>();
