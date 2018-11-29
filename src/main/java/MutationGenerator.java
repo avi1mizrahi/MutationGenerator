@@ -11,6 +11,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 class MutationGenerator {
 
@@ -31,8 +34,19 @@ class MutationGenerator {
         final File[] files = Objects.requireNonNull(commandLineParameters.inputDirectory.listFiles(
                 pathname -> pathname.isFile() && pathname.getName().toLowerCase().endsWith(".java")));
 
+        final ExecutorService threadPool = Executors.newFixedThreadPool(8);
+        final List<Callable<Void>> tasks = new ArrayList<>();
+
         for (var file : files) {
-            processFile(mutators, file, commandLineParameters.outputDirectory);
+            tasks.add(new FileProcessTask(mutators, file, commandLineParameters.outputDirectory));
+        }
+
+        try {
+            threadPool.invokeAll(tasks);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } finally {
+            threadPool.shutdown();
         }
     }
 
@@ -69,5 +83,23 @@ class MutationGenerator {
             }
         }
         return nFailed;
+    }
+
+    private static class FileProcessTask implements Callable<Void> {
+        private final List<CuMutationProcessor> mutators;
+        private final File file;
+        private final File outputDirectory;
+
+        FileProcessTask(List<CuMutationProcessor> mutators, File file, File outputDirectory) {
+            this.mutators = mutators;
+            this.file = file;
+            this.outputDirectory = outputDirectory;
+        }
+
+        @Override
+        public Void call() {
+            processFile(mutators, file, outputDirectory);
+            return null;
+        }
     }
 }
