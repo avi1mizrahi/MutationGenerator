@@ -5,10 +5,12 @@ import org.kohsuke.args4j.CmdLineException;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-
 
 class MutationGenerator {
 
@@ -29,29 +31,43 @@ class MutationGenerator {
         final File[] files = Objects.requireNonNull(commandLineParameters.inputDirectory.listFiles(
                 pathname -> pathname.isFile() && pathname.getName().toLowerCase().endsWith(".java")));
 
-        int nFailed = 0;
-
         for (var file : files) {
-            System.out.println("FILE: " + file.getPath());
+            processFile(mutators, file, commandLineParameters.outputDirectory);
+        }
+    }
 
-            CompilationUnit unit;
-            try {
-                unit = JavaParser.parse(file);
-            } catch (ParseProblemException | FileNotFoundException e) {
-                nFailed++;
-                e.printStackTrace();
-                continue;
-            }
+    private static int processFile(List<CuMutationProcessor> mutators, File file, File outputDirectory) {
+        int nFailed = 0;
+        System.out.println("FILE: " + file.getPath());
 
-            for (var mutator : mutators) {
-                final List<String> mutations = mutator.process(unit);
-                if (!mutations.isEmpty()) System.out.println("================================");
-
-                // TODO: write them to file
-                mutations.forEach((System.out::println));
-            }
+        CompilationUnit unit;
+        try {
+            unit = JavaParser.parse(file);
+        } catch (ParseProblemException | FileNotFoundException e) {
+            nFailed++;
+            e.printStackTrace();
+            return nFailed;
         }
 
-        System.out.println("Failed=" + nFailed);
+        final String dir = String.format("%s/%s", outputDirectory.getPath(), file.getName().replace(".java", ""));
+        new File(dir).mkdirs();
+
+        int fileIndex = 0;
+        for (var mutator : mutators) {
+            final List<String> mutations = mutator.process(unit);
+
+            for (var mutation : mutations) {
+                try {
+                    var writer = new PrintWriter(String.format("%s/%d.java", dir, fileIndex++), StandardCharsets.UTF_8);
+                    writer.println(mutation);
+                    writer.close();
+                } catch (IOException e) {
+                    nFailed++;
+                    e.printStackTrace();
+                    return nFailed;
+                }
+            }
+        }
+        return nFailed;
     }
 }
