@@ -27,4 +27,9 @@ class SequentialMutationProcessor implements CuMutationProcessor {
 
         return mutations;
     }
+
+    @Override
+    public String toString() {
+        return mutator.getClass().getSimpleName();
+    }
 }

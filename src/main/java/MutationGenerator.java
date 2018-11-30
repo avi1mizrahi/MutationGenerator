@@ -50,39 +50,41 @@ class MutationGenerator {
         }
     }
 
-    private static int processFile(List<CuMutationProcessor> mutators, File file, File outputDirectory) {
-        int nFailed = 0;
+    private static void processFile(List<CuMutationProcessor> mutators, File file, File outputDirectory) {
         System.out.println("FILE: " + file.getPath());
 
         CompilationUnit unit;
         try {
             unit = JavaParser.parse(file);
         } catch (ParseProblemException | FileNotFoundException e) {
-            nFailed++;
             e.printStackTrace();
-            return nFailed;
+            return;
         }
-
-        final String dir = String.format("%s/%s", outputDirectory.getPath(), file.getName().replace(".java", ""));
-        new File(dir).mkdirs();
 
         int fileIndex = 0;
         for (var mutator : mutators) {
             final List<String> mutations = mutator.process(unit);
 
+            final String dir = String.format("%s/%s/%s",
+                    outputDirectory.getPath(),
+                    mutator,
+                    file.getName().replace(".java", ""));
+
+            if (!mutations.isEmpty()) {
+                new File(dir).mkdirs();
+            }
             for (var mutation : mutations) {
                 try {
                     var writer = new PrintWriter(String.format("%s/%d.java", dir, fileIndex++), StandardCharsets.UTF_8);
                     writer.println(mutation);
                     writer.close();
                 } catch (IOException e) {
-                    nFailed++;
                     e.printStackTrace();
-                    return nFailed;
+                    return;
                 }
             }
         }
-        return nFailed;
+        return;
     }
 
     private static class FileProcessTask implements Callable<Void> {
