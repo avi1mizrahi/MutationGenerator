@@ -34,7 +34,7 @@ class MutationGenerator {
         final File[] files = Objects.requireNonNull(commandLineParameters.inputDirectory.listFiles(
                 pathname -> pathname.isFile() && pathname.getName().toLowerCase().endsWith(".java")));
 
-        final ExecutorService threadPool = Executors.newFixedThreadPool(8);
+        final ExecutorService threadPool = Executors.newFixedThreadPool(commandLineParameters.numThreads);
         final List<Callable<Void>> tasks = new ArrayList<>();
 
         for (var file : files) {

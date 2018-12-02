@@ -23,6 +23,9 @@ class CommandLineParameters {
     @Option(name = "--rename-variable", usage = "Rename local variable")
     public boolean renameVariable = false;
 
+    @Option(name = "--num-threads")
+    public int numThreads = 8;
+
 
     public CommandLineParameters(String... args) throws CmdLineException {
         parser = new CmdLineParser(this);
@@ -38,12 +41,17 @@ class CommandLineParameters {
             checkOutputDirectory();
 
             checkMutations();
+            checkThreads();
 
         } catch (CmdLineException e) {
             System.err.println(e.getMessage());
             parser.printUsage(System.err);
             throw e;
         }
+    }
+
+    private void checkThreads() throws CmdLineException {
+        if (numThreads < 1) error("Don't be funny, --num-threads must be positive");
     }
 
     private void checkMutations() throws CmdLineException {
