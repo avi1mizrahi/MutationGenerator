@@ -50,7 +50,7 @@ class MutationGenerator {
         }
     }
 
-    private static void processFile(List<CuMutationProcessor> mutators, File file, File outputDirectory) {
+    private static void processFile(List<CuMutationProcessor> mutators, File file, File outputDirectory) throws IOException {
         System.out.println("FILE: " + file.getPath());
 
         CompilationUnit unit;
@@ -71,7 +71,9 @@ class MutationGenerator {
                     file.getName().replace(".java", ""));
 
             if (!mutations.isEmpty()) {
-                new File(dir).mkdirs();
+                if (!new File(dir).mkdirs()) {
+                    throw new IOException("Can't create directory: " + dir);
+                }
             }
             for (var mutation : mutations) {
                 try {
@@ -84,7 +86,6 @@ class MutationGenerator {
                 }
             }
         }
-        return;
     }
 
     private static class FileProcessTask implements Callable<Void> {
@@ -99,7 +100,7 @@ class MutationGenerator {
         }
 
         @Override
-        public Void call() {
+        public Void call() throws IOException {
             processFile(mutators, file, outputDirectory);
             return null;
         }
