@@ -49,6 +49,10 @@ public class BinaryExprMutator implements MethodMutationProcessor {
         return null;
     }
 
+    private static boolean isPossibleStringOp(BinaryExpr.Operator op) {
+        return op == BinaryExpr.Operator.PLUS;
+    }
+
     @Override
     public List<String> process(MethodDeclaration method) {
         List<String> mutations = new ArrayList<>();
@@ -62,7 +66,8 @@ public class BinaryExprMutator implements MethodMutationProcessor {
         private final List<String> mutations;
         private final MethodDeclaration method;
         private boolean foundString = false;
-        private static final List<String> probablyStrings = Arrays.asList("name", "string", "str", "doc", "comment", "desc", "title");
+        private static final List<String> probablyStrings = Arrays.asList(
+                "name", "string", "str", "doc", "comment", "desc", "title", "regex", "exp", "msg", "message");
 
         Visitor(List<String> mutations, MethodDeclaration method) {
             this.mutations = mutations;
@@ -76,7 +81,7 @@ public class BinaryExprMutator implements MethodMutationProcessor {
 
         @Override
         public void visit(SimpleName n, Void arg) {
-            if (probablyStrings.parallelStream().anyMatch(n.getIdentifier().toLowerCase()::contains))
+            if (!foundString && probablyStrings.stream().anyMatch(n.getIdentifier().toLowerCase()::contains))
                 foundString = true;
             super.visit(n, arg);
         }
@@ -88,14 +93,15 @@ public class BinaryExprMutator implements MethodMutationProcessor {
 
             super.visit(n, arg);
 
-            if (foundString) {
+            final var op = n.getOperator();
+
+            if (!isFlippableComparator(op) || (foundString && isPossibleStringOp(op))) {
                 return;
             }
 
-            final var op = n.getOperator();
-
-            if (!isFlippableComparator(op)) {
-                return;
+            foundString = prevFoundString;// pop the old value
+            if (!isPossibleStringOp(op)) {
+                foundString = false;
             }
 
             final var left = n.getLeft();
@@ -110,8 +116,6 @@ public class BinaryExprMutator implements MethodMutationProcessor {
             n.setLeft(left);
             n.setRight(right);
             n.setOperator(op);
-
-            foundString = prevFoundString;// pop the old value
         }
     }
 }
