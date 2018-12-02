@@ -1,8 +1,9 @@
 import com.github.javaparser.ast.body.MethodDeclaration;
-import com.github.javaparser.ast.expr.BinaryExpr;
+import com.github.javaparser.ast.expr.*;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class BinaryExprMutator implements MethodMutationProcessor {
@@ -52,32 +53,65 @@ public class BinaryExprMutator implements MethodMutationProcessor {
     public List<String> process(MethodDeclaration method) {
         List<String> mutations = new ArrayList<>();
 
-        method.accept(new VoidVisitorAdapter<Void>() {
-            @Override
-            public void visit(BinaryExpr n, Void arg) {
-                super.visit(n, arg);
-
-                final var op = n.getOperator();
-
-                if (!isFlippableComparator(op)) {
-                    return;
-                }
-
-                final var left = n.getLeft();
-                final var right = n.getRight();
-
-                n.setLeft(right);
-                n.setRight(left);
-                flipComparator(n);
-
-                mutations.add(method.toString());
-
-                n.setLeft(left);
-                n.setRight(right);
-                n.setOperator(op);
-            }
-        }, null);
+        method.accept(new Visitor(mutations, method), null);
 
         return mutations;
+    }
+
+    private static class Visitor extends VoidVisitorAdapter<Void> {
+        private final List<String> mutations;
+        private final MethodDeclaration method;
+        private boolean foundString = false;
+        private static final List<String> probablyStrings = Arrays.asList("name", "string", "str", "doc", "comment", "desc", "title");
+
+        Visitor(List<String> mutations, MethodDeclaration method) {
+            this.mutations = mutations;
+            this.method = method;
+        }
+
+        @Override
+        public void visit(StringLiteralExpr n, Void arg) {
+            foundString = true;
+        }
+
+        @Override
+        public void visit(SimpleName n, Void arg) {
+            if (probablyStrings.parallelStream().anyMatch(n.getIdentifier().toLowerCase()::contains))
+                foundString = true;
+            super.visit(n, arg);
+        }
+
+        @Override
+        public void visit(BinaryExpr n, Void arg) {
+            var prevFoundString = foundString;// maintain a "stack"
+            foundString = false;
+
+            super.visit(n, arg);
+
+            if (foundString) {
+                return;
+            }
+
+            final var op = n.getOperator();
+
+            if (!isFlippableComparator(op)) {
+                return;
+            }
+
+            final var left = n.getLeft();
+            final var right = n.getRight();
+
+            n.setLeft(right);
+            n.setRight(left);
+            flipComparator(n);
+
+            mutations.add(method.toString());
+
+            n.setLeft(left);
+            n.setRight(right);
+            n.setOperator(op);
+
+            foundString = prevFoundString;// pop the old value
+        }
     }
 }
