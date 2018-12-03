@@ -23,6 +23,9 @@ class CommandLineParameters {
     @Option(name = "--rename-variable", usage = "Rename local variable")
     public boolean renameVariable = false;
 
+    @Option(name = "--word2vec-map", depends = "--rename-variable", usage = "Rename local variable")
+    public File word2vecMap = null;
+
     @Option(name = "--num-similarities", depends = "--rename-variable", usage = "number of similarities to find for each word")
     public int numSimilarities = 3;
 
@@ -71,6 +74,7 @@ class CommandLineParameters {
         }
 
         if (numSimilarities < 1) error("numSimilarities must be positive");
+        if (word2vecMap != null && !word2vecMap.exists()) error("No such \"word2vecMap\": " + word2vecMap.getPath());
     }
 
     private void checkInputDirectory() throws CmdLineException {

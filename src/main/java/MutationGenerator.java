@@ -17,11 +17,11 @@ import java.util.concurrent.Executors;
 
 class MutationGenerator {
 
-    public static void main(String[] args) throws CmdLineException {
+    public static void main(String[] args) throws CmdLineException, IOException {
         new MutationGenerator(new CommandLineParameters(args));
     }
 
-    MutationGenerator(CommandLineParameters commandLineParameters) {
+    MutationGenerator(CommandLineParameters commandLineParameters) throws IOException {
         List<CuMutationProcessor> mutators = new ArrayList<>();
 
         if (commandLineParameters.flipBinaryExpr) {
@@ -29,7 +29,11 @@ class MutationGenerator {
         }
         if (commandLineParameters.renameVariable) {
             NameGenerator nameGenerator;
+            if (commandLineParameters.word2vecMap != null) {
+                nameGenerator = new SimilaritiesFinder(commandLineParameters.word2vecMap, commandLineParameters.numSimilarities);
+            } else {
                 nameGenerator = new StupidNameGenerator(commandLineParameters.numSimilarities);
+            }
             mutators.add(new SequentialMutationProcessor(new RenameMutator(nameGenerator)));
         }
 
