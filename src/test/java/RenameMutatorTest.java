@@ -1,8 +1,5 @@
 import org.junit.jupiter.api.Test;
 
-import java.util.ArrayList;
-import java.util.List;
-
 
 class RenameMutatorTest extends MutatorTest {
     @Test
@@ -39,17 +36,6 @@ class RenameMutatorTest extends MutatorTest {
 
     @Override
     MethodMutationProcessor createProcessor() {
-        return new RenameMutator(new MockNameGenerator());
-    }
-
-    private static class MockNameGenerator implements NameGenerator {
-        @Override
-        public List<String> generateNames(String name) {
-            var names = new ArrayList<String>();
-            for (int i = 0; i < 2; i++) {
-                names.add(name + i);
-            }
-            return names;
-        }
+        return new RenameMutator(new StupidNameGenerator(2));
     }
 }

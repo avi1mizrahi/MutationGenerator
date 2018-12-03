@@ -23,6 +23,9 @@ class CommandLineParameters {
     @Option(name = "--rename-variable", usage = "Rename local variable")
     public boolean renameVariable = false;
 
+    @Option(name = "--num-similarities", depends = "--rename-variable", usage = "number of similarities to find for each word")
+    public int numSimilarities = 3;
+
     @Option(name = "--num-threads")
     public int numThreads = 8;
 
@@ -58,6 +61,16 @@ class CommandLineParameters {
         if (!flipBinaryExpr && !renameVariable) {
             error("No mutation was chosen");
         }
+
+        checkRenameVariable();
+    }
+
+    private void checkRenameVariable() throws CmdLineException {
+        if (!renameVariable) {
+            return;
+        }
+
+        if (numSimilarities < 1) error("numSimilarities must be positive");
     }
 
     private void checkInputDirectory() throws CmdLineException {

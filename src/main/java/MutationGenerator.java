@@ -28,7 +28,9 @@ class MutationGenerator {
             mutators.add(new SequentialMutationProcessor(new BinaryExprMutator()));
         }
         if (commandLineParameters.renameVariable) {
-            mutators.add(new SequentialMutationProcessor(new RenameMutator(name -> new ArrayList<>(List.of("newName1", "b")))));
+            NameGenerator nameGenerator;
+                nameGenerator = new StupidNameGenerator(commandLineParameters.numSimilarities);
+            mutators.add(new SequentialMutationProcessor(new RenameMutator(nameGenerator)));
         }
 
         final File[] files = Objects.requireNonNull(commandLineParameters.inputDirectory.listFiles(
