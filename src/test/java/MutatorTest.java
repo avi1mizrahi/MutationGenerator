@@ -9,10 +9,10 @@ import java.util.stream.Collectors;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
-public abstract class MutatorTest {
+abstract class MutatorTest {
     abstract MethodMutationProcessor createProcessor();
 
-    protected static class MutationsCase {
+    static class MutationsCase {
         private final MethodDeclaration orig;
         private final Set<MethodDeclaration> expected;
 
@@ -24,7 +24,7 @@ public abstract class MutatorTest {
             expected = cus.stream().map(cu -> cu.findFirst(MethodDeclaration.class).get() ).collect(Collectors.toSet());
         }
 
-        public Set<String> expectedAsStrings() {
+        Set<String> expectedAsStrings() {
             return expected.stream().map(Node::toString).collect(Collectors.toSet());
         }
 
@@ -33,7 +33,7 @@ public abstract class MutatorTest {
         }
     }
 
-    protected void checkExpectation(MutationsCase mutationsCase) {
+    void checkExpectation(MutationsCase mutationsCase) {
         var processor = createProcessor();
         var generatedMutations = Set.copyOf(processor.process(mutationsCase.orig));
 

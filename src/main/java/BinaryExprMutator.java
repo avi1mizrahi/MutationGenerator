@@ -5,6 +5,7 @@ import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 public class BinaryExprMutator implements MethodMutationProcessor {
 
@@ -29,7 +30,7 @@ public class BinaryExprMutator implements MethodMutationProcessor {
     }
 
     private static void flipComparator(BinaryExpr binaryExpr) {
-        binaryExpr.setOperator(getFlippedComparator(binaryExpr.getOperator()));
+        binaryExpr.setOperator(Objects.requireNonNull(getFlippedComparator(binaryExpr.getOperator())));
     }
 
     private static BinaryExpr.Operator getFlippedComparator(BinaryExpr.Operator binaryOperator) {
