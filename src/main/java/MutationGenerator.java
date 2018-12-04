@@ -15,14 +15,18 @@ import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 class MutationGenerator {
 
-    public static void main(String[] args) throws CmdLineException, IOException {
+    public static void main(String[] args) throws
+            CmdLineException,
+            IOException,
+            InterruptedException {
         new MutationGenerator(new CommandLineParameters(args));
     }
 
-    MutationGenerator(CommandLineParameters parameters) throws IOException {
+    MutationGenerator(CommandLineParameters parameters) throws IOException, InterruptedException {
         List<CuMutationProcessor> mutators = new ArrayList<>();
 
         if (parameters.flipBinaryExpr) {
@@ -39,27 +43,19 @@ class MutationGenerator {
             mutators.add(new SequentialMutationProcessor(new RenameMutator(nameGenerator)));
         }
 
-        final List<Callable<Void>> tasks = new ArrayList<>();
-
+        final ExecutorService threadPool = Executors.newFixedThreadPool(parameters.numThreads);
         final Path inputDir = parameters.inputDirectory.toPath();
         Files.find(inputDir,
                    4,
                    (path, basicFileAttributes) ->
                            basicFileAttributes.isRegularFile() &&
                                    path.toString().endsWith(".java"))
-             .forEach(path -> tasks.add(new FileProcessTask(mutators,
-                                                            path.toFile(),
-                                                            parameters.inputDirectory.toPath(),
-                                                            parameters.outputDirectory)));
-
-        final ExecutorService threadPool = Executors.newFixedThreadPool(parameters.numThreads);
-        try {
-            threadPool.invokeAll(tasks);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } finally {
-            threadPool.shutdown();
-        }
+             .forEach(path -> threadPool.submit(new FileProcessTask(mutators,
+                                                                    path.toFile(),
+                                                                    parameters.inputDirectory.toPath(),
+                                                                    parameters.outputDirectory)));
+        threadPool.shutdown();
+        threadPool.awaitTermination(1, TimeUnit.HOURS);
     }
 
     private static void processFile(List<CuMutationProcessor> mutators,
