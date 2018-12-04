@@ -5,11 +5,11 @@ class RenameMutatorTest extends MutatorTest {
     @Test
     void simpleRename() {
         checkExpectation(new MutationsCase(
-                "void foo() { int a; double d; return a + d; }",
-                "void foo() { int a0; double d; return a0 + d; }",
-                "void foo() { int a1; double d; return a1 + d; }",
-                "void foo() { int a; double d0; return a + d0; }",
-                "void foo() { int a; double d1; return a + d1; }"
+                "void foo() { int a = 3; double d; return a + d; }",
+                "void foo() { int a0 = 3; double d; return a0 + d; }",
+                "void foo() { int a1 = 3; double d; return a1 + d; }",
+                "void foo() { int a = 3; double d0; return a + d0; }",
+                "void foo() { int a = 3; double d1; return a + d1; }"
         ));
     }
 
@@ -32,6 +32,36 @@ class RenameMutatorTest extends MutatorTest {
                 "void foo() { int a; double d0; return a.foo() + d0; }",
                 "void foo() { int a; double d1; return a.foo() + d1; }"
         ));
+    }
+
+    @Test
+    void nestedOperator() {
+        checkExpectation(new MutationsCase(
+                "public int foo() {"    +
+                "    int local2 = 42;"  +
+                "    int b = 23;"       +
+                "    return 43 + local2 * (b + 1) - b / 33;" +
+                "}",
+                "public int foo() {"    +
+                "    int local20 = 42;"  +
+                "    int b = 23;"       +
+                "    return 43 + local20 * (b + 1) - b / 33;" +
+                "}",
+                "public int foo() {"    +
+                "    int local21 = 42;"  +
+                "    int b = 23;"       +
+                "    return 43 + local21 * (b + 1) - b / 33;" +
+                "}",
+                "public int foo() {"    +
+                "    int local2 = 42;"  +
+                "    int b0 = 23;"       +
+                "    return 43 + local2 * (b0 + 1) - b0 / 33;" +
+                "}",
+                "public int foo() {"    +
+                "    int local2 = 42;"  +
+                "    int b1 = 23;"       +
+                "    return 43 + local2 * (b1 + 1) - b1 / 33;" +
+                "}"));
     }
 
     @Override

@@ -9,7 +9,6 @@ class BinaryExprMutatorTest extends MutatorTest {
                 "int foo() { return 123 + 355; }"));
     }
 
-
     @Test
     void notCommutative() {
         checkExpectation(new MutationsCase(
