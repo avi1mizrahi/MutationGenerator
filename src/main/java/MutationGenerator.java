@@ -67,7 +67,6 @@ class MutationGenerator {
             return;
         }
 
-        int fileIndex = 0;
         for (var mutator : mutators) {
             final List<String> mutations = mutator.process(unit);
 
@@ -81,9 +80,12 @@ class MutationGenerator {
                     throw new IOException("Can't create directory: " + dir);
                 }
             }
+
+            int fileIndex = 0;
             for (var mutation : mutations) {
                 try {
-                    var writer = new PrintWriter(String.format("%s/%d.java", dir, fileIndex++), StandardCharsets.UTF_8);
+                    var writer = new PrintWriter(String.format("%s/%d.java", dir, fileIndex), StandardCharsets.UTF_8);
+                    fileIndex++;
                     writer.println(mutation);
                     writer.close();
                 } catch (IOException e) {
