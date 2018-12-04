@@ -1,5 +1,7 @@
 import com.github.javaparser.ast.body.MethodDeclaration;
-import com.github.javaparser.ast.expr.*;
+import com.github.javaparser.ast.expr.BinaryExpr;
+import com.github.javaparser.ast.expr.SimpleName;
+import com.github.javaparser.ast.expr.StringLiteralExpr;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 
 import java.util.ArrayList;
@@ -101,9 +103,6 @@ public class BinaryExprMutator implements MethodMutationProcessor {
             }
 
             foundString = prevFoundString;// pop the old value
-            if (!isPossibleStringOp(op)) {
-                foundString = false;
-            }
 
             final var left = n.getLeft();
             final var right = n.getRight();
