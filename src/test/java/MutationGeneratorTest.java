@@ -61,6 +61,7 @@ class MutationGeneratorTest {
     //  (that the mutations should not be used together)
         assertDoesNotThrow(() ->
                 MutationGenerator.main(new String[]{
+                        "--num-threads", "1",
                         "--input-dir", INPUT_DIR,
                         "--output-dir", OUTPUT_DIR,
                         "--flip-binary-expr"
@@ -68,6 +69,7 @@ class MutationGeneratorTest {
 
         assertDoesNotThrow(() ->
                 MutationGenerator.main(new String[]{
+                        "--num-threads", "1",
                         "--input-dir", INPUT_DIR,
                         "--output-dir", OUTPUT_DIR,
                         "--rename-variable",
