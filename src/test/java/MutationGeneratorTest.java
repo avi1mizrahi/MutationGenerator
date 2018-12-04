@@ -27,20 +27,32 @@ class MutationGeneratorTest {
         }
     }
 
-    static void assertDirectoriesEqual(Path dir1, Path dir2) throws Exception {
-        var i1 = Files.walk(dir1).iterator();
-        final Exception[] exception = {null};
+    static void assertDirectoriesEqual(Path dir1, Path dir2) throws IOException {
+        try (var s1 = Files.walk(dir1);
+             var s2 = Files.walk(dir2)) {
 
-        Files.walk(dir2).forEach(path -> {
-            if (dir2.toFile().isDirectory()) return;
-            try {
-                assertArrayEquals(Files.readAllBytes(i1.next()), Files.readAllBytes(path));
-            } catch (IOException e) {
-                exception[0] = e;
+            var i1 = s1.iterator();
+            var i2 = s2.iterator();
+
+            i1.next(); i2.next();//skip the root
+
+            while (i1.hasNext() && i2.hasNext()) {
+                var p1 = i1.next();
+                var p2 = i2.next();
+
+                assertEquals(p1.getFileName(), p2.getFileName());
+
+                if (p1.toFile().isDirectory()) {
+                    assertTrue(p2.toFile().isDirectory());
+                    continue;
+                }
+
+                assertArrayEquals(Files.readAllBytes(p1), Files.readAllBytes(p2));
             }
-        });
 
-        if (exception[0] != null) throw exception[0];
+            assertFalse(i1.hasNext());
+            assertFalse(i2.hasNext());
+        }
     }
 
     @Test
