@@ -8,9 +8,10 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -21,32 +22,37 @@ class MutationGenerator {
         new MutationGenerator(new CommandLineParameters(args));
     }
 
-    MutationGenerator(CommandLineParameters commandLineParameters) throws IOException {
+    MutationGenerator(CommandLineParameters parameters) throws IOException {
         List<CuMutationProcessor> mutators = new ArrayList<>();
 
-        if (commandLineParameters.flipBinaryExpr) {
+        if (parameters.flipBinaryExpr) {
             mutators.add(new SequentialMutationProcessor(new BinaryExprMutator()));
         }
-        if (commandLineParameters.renameVariable) {
+        if (parameters.renameVariable) {
             NameGenerator nameGenerator;
-            if (commandLineParameters.word2vecMap != null) {
-                nameGenerator = new SimilaritiesFinder(commandLineParameters.word2vecMap, commandLineParameters.numSimilarities);
+            if (parameters.word2vecMap != null) {
+                nameGenerator = new SimilaritiesFinder(parameters.word2vecMap,
+                                                       parameters.numSimilarities);
             } else {
-                nameGenerator = new StupidNameGenerator(commandLineParameters.numSimilarities);
+                nameGenerator = new StupidNameGenerator(parameters.numSimilarities);
             }
             mutators.add(new SequentialMutationProcessor(new RenameMutator(nameGenerator)));
         }
 
-        final File[] files = Objects.requireNonNull(commandLineParameters.inputDirectory.listFiles(
-                pathname -> pathname.isFile() && pathname.getName().toLowerCase().endsWith(".java")));
-
-        final ExecutorService threadPool = Executors.newFixedThreadPool(commandLineParameters.numThreads);
         final List<Callable<Void>> tasks = new ArrayList<>();
 
-        for (var file : files) {
-            tasks.add(new FileProcessTask(mutators, file, commandLineParameters.outputDirectory));
-        }
+        final Path inputDir = parameters.inputDirectory.toPath();
+        Files.find(inputDir,
+                   4,
+                   (path, basicFileAttributes) ->
+                           basicFileAttributes.isRegularFile() &&
+                                   path.toString().endsWith(".java"))
+             .forEach(path -> tasks.add(new FileProcessTask(mutators,
+                                                            path.toFile(),
+                                                            parameters.inputDirectory.toPath(),
+                                                            parameters.outputDirectory)));
 
+        final ExecutorService threadPool = Executors.newFixedThreadPool(parameters.numThreads);
         try {
             threadPool.invokeAll(tasks);
         } catch (InterruptedException e) {
@@ -56,8 +62,11 @@ class MutationGenerator {
         }
     }
 
-    private static void processFile(List<CuMutationProcessor> mutators, File file, File outputDirectory) throws IOException {
-        System.out.println("FILE: " + file.getPath());
+    private static void processFile(List<CuMutationProcessor> mutators,
+                                    File file,
+                                    Path inputDirectory,
+                                    File outputDirectory) throws IOException {
+        System.out.println("Parsing file: " + file.getPath());
 
         CompilationUnit unit;
         try {
@@ -67,13 +76,16 @@ class MutationGenerator {
             return;
         }
 
+        var relativeDirPathOfFile = inputDirectory.relativize(file.toPath())
+                                                  .toString()
+                                                  .replace(".java", "");
         for (var mutator : mutators) {
             final List<String> mutations = mutator.process(unit);
 
             final String dir = String.format("%s/%s/%s",
-                    outputDirectory.getPath(),
-                    mutator,
-                    file.getName().replace(".java", ""));
+                                             outputDirectory.getPath(),
+                                             mutator,
+                                             relativeDirPathOfFile);
 
             if (!mutations.isEmpty()) {
                 if (!new File(dir).mkdirs()) {
@@ -84,7 +96,8 @@ class MutationGenerator {
             int fileIndex = 0;
             for (var mutation : mutations) {
                 try {
-                    var writer = new PrintWriter(String.format("%s/%d.java", dir, fileIndex), StandardCharsets.UTF_8);
+                    var writer = new PrintWriter(String.format("%s/%d.java", dir, fileIndex),
+                                                 StandardCharsets.UTF_8);
                     fileIndex++;
                     writer.println(mutation);
                     writer.close();
@@ -100,16 +113,21 @@ class MutationGenerator {
         private final List<CuMutationProcessor> mutators;
         private final File file;
         private final File outputDirectory;
+        private final Path inputDirectory;
 
-        FileProcessTask(List<CuMutationProcessor> mutators, File file, File outputDirectory) {
+        FileProcessTask(List<CuMutationProcessor> mutators,
+                        File file,
+                        Path inputDirectory,
+                        File outputDirectory) {
             this.mutators = mutators;
             this.file = file;
             this.outputDirectory = outputDirectory;
+            this.inputDirectory = inputDirectory;
         }
 
         @Override
         public Void call() throws IOException {
-            processFile(mutators, file, outputDirectory);
+            processFile(mutators, file, inputDirectory, outputDirectory);
             return null;
         }
     }
