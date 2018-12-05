@@ -16,9 +16,15 @@ abstract class MutatorTest {
         private final MethodDeclaration orig;
         private final Set<MethodDeclaration> expected;
 
-        MutationsCase(String from, String... to) {
-            var cu1 = JavaParser.parse(wrapWithClass(from));
-            var cus = List.of(to).stream().map(MutationsCase::wrapWithClass).map(JavaParser::parse).collect(Collectors.toSet());
+        enum WrapOptions {WRAP_WITH_CLASS, AS_IS}
+
+        MutationsCase(WrapOptions wrapOptions, String from, String... to) {
+            if (wrapOptions == WrapOptions.WRAP_WITH_CLASS) {
+                from = wrapWithClass(from);
+            }
+            var cu1 = JavaParser.parse(from);
+            var cus = List.of(to).stream().map(MutationsCase::wrapWithClass)
+                          .map(JavaParser::parse).collect(Collectors.toSet());
 
             orig = cu1.findFirst(MethodDeclaration.class).get();
             expected = cus.stream().map(cu -> cu.findFirst(MethodDeclaration.class).get() ).collect(Collectors.toSet());
