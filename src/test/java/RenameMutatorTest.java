@@ -14,6 +14,17 @@ class RenameMutatorTest extends MutatorTest {
     }
 
     @Test
+    void withObjects() {
+        checkExpectation(new MutationsCase(
+                "void foo() { A a = 3; double d; return a.foo().d + d + foo().bar() + a.d; }",
+                "void foo() { A a0 = 3; double d; return a0.foo().d + d + foo().bar() + a0.d; }",
+                "void foo() { A a1 = 3; double d; return a1.foo().d + d + foo().bar() + a1.d; }",
+                "void foo() { A a = 3; double d0; return a.foo().d + d0 + foo().bar() + a.d; }",
+                "void foo() { A a = 3; double d1; return a.foo().d + d1 + foo().bar() + a.d; }"
+        ));
+    }
+
+    @Test
     void avoidConflict() {
         checkExpectation(new MutationsCase(
                 "void foo() { int a; double a0; return a + a0; }",

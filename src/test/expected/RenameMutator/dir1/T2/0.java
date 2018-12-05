@@ -1,3 +1,3 @@
-static void Ping0() {
-    Pong<? super Ping0<Long>> Ping0 = new Ping0<Long>();
+static void Ping() {
+    Pong<? super Ping<Long>> Ping0 = new Ping<Long>();
 }
