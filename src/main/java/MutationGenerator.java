@@ -17,7 +17,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-class MutationGenerator {
+public class MutationGenerator {
 
     public static void main(String[] args) throws
             CmdLineException,
