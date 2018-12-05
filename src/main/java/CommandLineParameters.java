@@ -23,7 +23,7 @@ class CommandLineParameters {
     @Option(name = "--rename-variable", usage = "Rename local variable")
     public boolean renameVariable = false;
 
-    @Option(name = "--word2vec-map", depends = "--rename-variable", usage = "Rename local variable")
+    @Option(name = "--word2vec-map", depends = "--rename-variable", usage = "word embeddings file")
     public File word2vecMap = null;
 
     @Option(name = "--num-similarities", depends = "--rename-variable", usage = "number of similarities to find for each word")
@@ -63,6 +63,10 @@ class CommandLineParameters {
     private void checkMutations() throws CmdLineException {
         if (!flipBinaryExpr && !renameVariable) {
             error("No mutation was chosen");
+        }
+
+        if (flipBinaryExpr && renameVariable) {//TODO fixme
+            error("Forbidden due to a known bug");
         }
 
         checkRenameVariable();
