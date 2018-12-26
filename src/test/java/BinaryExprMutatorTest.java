@@ -1,3 +1,4 @@
+import com.github.javaparser.ast.body.MethodDeclaration;
 import org.junit.jupiter.api.Test;
 
 class BinaryExprMutatorTest extends MutatorTest {
@@ -72,7 +73,7 @@ class BinaryExprMutatorTest extends MutatorTest {
     }
 
     @Override
-    MethodMutationProcessor createProcessor() {
+    MutationProcessor<MethodDeclaration> createProcessor() {
         return new BinaryExprMutator();
     }
 }

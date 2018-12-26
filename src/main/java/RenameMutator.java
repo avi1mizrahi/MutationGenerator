@@ -18,7 +18,7 @@ interface NameGenerator {
  * place, the semantics is preserved - Some renames will be missed as may be valid because of
  * variable/field hiding etc.
  */
-public class RenameMutator implements MethodMutationProcessor {
+public class RenameMutator implements MutationProcessor<MethodDeclaration> {
     private final NameGenerator nameGenerator;
 
     RenameMutator(NameGenerator nameGenerator) {

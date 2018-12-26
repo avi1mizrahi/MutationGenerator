@@ -27,7 +27,7 @@ public class MutationGenerator {
     }
 
     MutationGenerator(CommandLineParameters parameters) throws IOException, InterruptedException {
-        List<CuMutationProcessor> mutators = new ArrayList<>();
+        List<MutationProcessor<CompilationUnit>> mutators = new ArrayList<>();
 
         if (parameters.flipBinaryExpr) {
             mutators.add(new SequentialMutationProcessor(new BinaryExprMutator()));
@@ -58,7 +58,7 @@ public class MutationGenerator {
         threadPool.awaitTermination(1, TimeUnit.HOURS);
     }
 
-    private static void processFile(List<CuMutationProcessor> mutators,
+    private static void processFile(List<MutationProcessor<CompilationUnit>> mutators,
                                     File file,
                                     Path inputDirectory,
                                     File outputDirectory) throws IOException {
@@ -106,12 +106,12 @@ public class MutationGenerator {
     }
 
     private static class FileProcessTask implements Callable<Void> {
-        private final List<CuMutationProcessor> mutators;
+        private final List<MutationProcessor<CompilationUnit>> mutators;
         private final File file;
         private final File outputDirectory;
         private final Path inputDirectory;
 
-        FileProcessTask(List<CuMutationProcessor> mutators,
+        FileProcessTask(List<MutationProcessor<CompilationUnit>> mutators,
                         File file,
                         Path inputDirectory,
                         File outputDirectory) {

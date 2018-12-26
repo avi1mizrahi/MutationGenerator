@@ -5,10 +5,10 @@ import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 import java.util.ArrayList;
 import java.util.List;
 
-class SequentialMutationProcessor implements CuMutationProcessor {
-    private final MethodMutationProcessor mutator;
+class SequentialMutationProcessor implements MutationProcessor<CompilationUnit> {
+    private final MutationProcessor<MethodDeclaration> mutator;
 
-    SequentialMutationProcessor(MethodMutationProcessor mutator) {
+    SequentialMutationProcessor(MutationProcessor<MethodDeclaration> mutator) {
         this.mutator = mutator;
     }
 

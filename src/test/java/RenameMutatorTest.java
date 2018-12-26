@@ -1,3 +1,4 @@
+import com.github.javaparser.ast.body.MethodDeclaration;
 import org.junit.jupiter.api.Test;
 
 
@@ -87,7 +88,7 @@ class RenameMutatorTest extends MutatorTest {
     }
 
     @Override
-    MethodMutationProcessor createProcessor() {
+    MutationProcessor<MethodDeclaration> createProcessor() {
         return new RenameMutator(new StupidNameGenerator(2));
     }
 }

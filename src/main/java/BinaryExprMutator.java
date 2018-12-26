@@ -9,7 +9,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
-public class BinaryExprMutator implements MethodMutationProcessor {
+public class BinaryExprMutator implements MutationProcessor<MethodDeclaration> {
 
     private static boolean isCommutative(BinaryExpr.Operator binaryOperator) {
         switch (binaryOperator) {

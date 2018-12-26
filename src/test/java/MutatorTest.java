@@ -10,7 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
 abstract class MutatorTest {
-    abstract MethodMutationProcessor createProcessor();
+    abstract MutationProcessor<MethodDeclaration> createProcessor();
 
     static class MutationsCase {
         private final MethodDeclaration orig;
