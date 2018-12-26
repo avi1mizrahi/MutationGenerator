@@ -79,4 +79,27 @@ class MutationGeneratorTest {
         assertDoesNotThrow(() ->
                 assertDirectoriesEqual(Paths.get(OUTPUT_DIR), Paths.get(EXPECTED_OUTPUT_DIR)));
     }
+    @Test
+    void testWithCache() {
+        assertDoesNotThrow(() ->
+                MutationGenerator.main(new String[]{
+                        "--num-threads", "1",
+                        "--input-dir", INPUT_DIR,
+                        "--output-dir", OUTPUT_DIR,
+                        "--flip-binary-expr"
+                }));
+
+        assertDoesNotThrow(() ->
+               MutationGenerator.main(new String[]{
+                       "--num-threads", "1",
+                       "--input-dir", INPUT_DIR,
+                       "--output-dir", OUTPUT_DIR,
+                       "--rename-variable",
+                       "--rename-cache-size", "3",
+                       "--num-similarities", "2"
+               }));
+
+        assertDoesNotThrow(() -> assertDirectoriesEqual(Paths.get(OUTPUT_DIR),
+                                                        Paths.get(EXPECTED_OUTPUT_DIR)));
+    }
 }

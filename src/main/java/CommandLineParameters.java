@@ -23,6 +23,9 @@ class CommandLineParameters {
     @Option(name = "--rename-variable", usage = "Rename local variable")
     public boolean renameVariable = false;
 
+    @Option(name = "--rename-cache-size", depends = "--rename-variable", usage = "Cache size (elements), to store generated similarities. 0 -> no cache")
+    public int renameCacheSize = 0;
+
     @Option(name = "--word2vec-map", depends = "--rename-variable", usage = "word embeddings file")
     public File word2vecMap = null;
 

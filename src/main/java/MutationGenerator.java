@@ -40,6 +40,9 @@ public class MutationGenerator {
             } else {
                 nameGenerator = new StupidNameGenerator(parameters.numSimilarities);
             }
+            if (parameters.renameCacheSize > 0) {
+                nameGenerator = new NameGeneratorCache(nameGenerator, parameters.renameCacheSize);
+            }
             mutators.add(new SequentialMutationProcessor(new RenameMutator(nameGenerator)));
         }
 
