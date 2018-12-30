@@ -3,13 +3,22 @@ import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 class SequentialMutationProcessor implements MutationProcessor<CompilationUnit> {
     private final MutationProcessor<MethodDeclaration> mutator;
+    private final int                                  maxMutationsPerMethod;
 
     SequentialMutationProcessor(MutationProcessor<MethodDeclaration> mutator) {
+        this(mutator, 0);
+    }
+
+    SequentialMutationProcessor(MutationProcessor<MethodDeclaration> mutator,
+                                int maxMutationsPerMethod) {
         this.mutator = mutator;
+        this.maxMutationsPerMethod = maxMutationsPerMethod;
     }
 
     @Override
@@ -21,7 +30,13 @@ class SequentialMutationProcessor implements MutationProcessor<CompilationUnit> 
             public void visit(MethodDeclaration n, Void arg) {
                 super.visit(n, arg);
 
-                mutations.addAll(mutator.process(n));
+                List<String> res = mutator.process(n);
+                if (maxMutationsPerMethod > 0 && maxMutationsPerMethod < res.size()) {
+                    Collections.shuffle(res);
+                    res = res.stream().limit(maxMutationsPerMethod).collect(Collectors.toList());
+                }
+
+                mutations.addAll(res);
             }
         }, null);
 

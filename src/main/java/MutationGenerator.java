@@ -30,7 +30,8 @@ public class MutationGenerator {
         List<MutationProcessor<CompilationUnit>> mutators = new ArrayList<>();
 
         if (parameters.flipBinaryExpr) {
-            mutators.add(new SequentialMutationProcessor(new BinaryExprMutator()));
+            mutators.add(new SequentialMutationProcessor(new BinaryExprMutator(),
+                                                         parameters.maxMutationsPerMethod));
         }
         if (parameters.renameVariable) {
             NameGenerator nameGenerator;
@@ -43,7 +44,8 @@ public class MutationGenerator {
             if (parameters.renameCacheSize > 0) {
                 nameGenerator = new NameGeneratorCache(nameGenerator, parameters.renameCacheSize);
             }
-            mutators.add(new SequentialMutationProcessor(new RenameMutator(nameGenerator)));
+            mutators.add(new SequentialMutationProcessor(new RenameMutator(nameGenerator),
+                                                         parameters.maxMutationsPerMethod));
         }
 
         final ExecutorService threadPool = Executors.newFixedThreadPool(parameters.numThreads);

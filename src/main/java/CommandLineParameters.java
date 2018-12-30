@@ -17,6 +17,9 @@ class CommandLineParameters {
     @Option(name = "--output-dir", metaVar = "DIR", required = true, usage = "output directory, generated files will be found here.")
     public File outputDirectory = null;
 
+    @Option(name = "--max-mutations-per-method", usage = "0 -> unlimited")
+    public int maxMutationsPerMethod = 0;
+
     @Option(name = "--flip-binary-expr", usage = "Flips binary expressions. \nExamples:\n 'obj + elm' -> 'elm + obj'\n 'obj <= elm' -> 'elm >= obj', ")
     public boolean flipBinaryExpr = false;
 
