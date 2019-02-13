@@ -66,10 +66,11 @@ public class BinaryExprMutator implements MutationProcessor<MethodDeclaration> {
     }
 
     private static class Visitor extends VoidVisitorAdapter<Void> {
-        private final List<MutatedMethod> mutations;
-        private final MethodDeclaration method;
-        private boolean foundString = false;
-        private static final List<String> probablyStrings = Arrays.asList(
+        private final        List<MutatedMethod> mutations;
+        private final        MethodDeclaration   method;
+        private              int                 index           = 0;
+        private              boolean             foundString     = false;
+        private static final List<String>        probablyStrings = Arrays.asList(
                 "name", "string", "str", "doc", "comment", "desc", "title", "regex", "exp", "msg", "message");
 
         Visitor(List<MutatedMethod> mutations, MethodDeclaration method) {
@@ -111,7 +112,7 @@ public class BinaryExprMutator implements MutationProcessor<MethodDeclaration> {
             n.setRight(left);
             flipComparator(n);
 
-            mutations.add(MutatedMethod.from(method));
+            mutations.add(MutatedMethod.from(method, ++index));
 
             n.setLeft(left);
             n.setRight(right);

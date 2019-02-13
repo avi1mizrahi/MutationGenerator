@@ -94,12 +94,13 @@ public class MutationGenerator {
                 }
             }
 
-            int fileIndex = 0;
             for (var mutation : mutations) {
                 try {
-                    var writer = new PrintWriter(String.format("%s/%d.java", dir, fileIndex),
+                    var writer = new PrintWriter(String.format("%s/%s_%d.java",
+                                                               dir,
+                                                               mutation.getMethodName(),
+                                                               mutation.getIndex()),
                                                  StandardCharsets.UTF_8);
-                    fileIndex++;
                     writer.println(mutation.getCode());
                     writer.close();
                 } catch (IOException e) {

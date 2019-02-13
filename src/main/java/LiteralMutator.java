@@ -15,8 +15,9 @@ public class LiteralMutator implements MutationProcessor<MethodDeclaration> {
             public void visit(IntegerLiteralExpr n, Void arg) {
                 var old = n.asInt();// TODO: there is a bug here I think. Try parsing big int
                 n.setInt(404040404);
-                mutations.add(MutatedMethod.from(method));
+//                mutations.add(MutatedMethod.from(method)); // TODO
                 n.setInt(old);
+                throw new RuntimeException("Not implemented");
             }
         }, null);
 

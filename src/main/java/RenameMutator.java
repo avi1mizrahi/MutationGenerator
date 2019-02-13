@@ -5,6 +5,7 @@ import com.github.javaparser.ast.expr.SimpleName;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -42,6 +43,7 @@ public class RenameMutator implements MutationProcessor<MethodDeclaration> {
                                                 .map(NameExpr::getName)
                                                 .collect(Collectors.toList());
 
+        AtomicInteger index = new AtomicInteger();
         for (var declarator : method.findAll(VariableDeclarator.class)) {
 
             nameGenerator.generateNames(declarator.getNameAsString())
@@ -55,7 +57,7 @@ public class RenameMutator implements MutationProcessor<MethodDeclaration> {
                 declarator.setName(suggestedName);
                 renameAll(allNames, oldName, suggestedName);
 
-                mutations.add(MutatedMethod.from(method));
+                mutations.add(MutatedMethod.from(method, index.incrementAndGet()));
 
                 renameAll(allNames, suggestedName, oldName);
                 declarator.setName(oldName);

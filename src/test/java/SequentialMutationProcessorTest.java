@@ -17,7 +17,7 @@ class SequentialMutationProcessorTest {
                                                                  "Bye",
                                                                  "die",
                                                                  "lie");
-    public static final  String          CODE    = "class C { void v() {} }";
+    private static final  String          CODE    = "class C { void v() {} }";
     private              CompilationUnit unit;
 
     @BeforeEach
@@ -29,7 +29,7 @@ class SequentialMutationProcessorTest {
     void process() {
         var seq = new SequentialMutationProcessor(
                 compilationUnit -> STRINGS.stream()
-                                          .map(MutatedMethod::new)
+                                          .map(s -> MutatedMethod.from("v", s, 0))
                                           .collect(Collectors.toList()));
 
         List<MutatedMethod> res = seq.process(unit);
@@ -45,7 +45,7 @@ class SequentialMutationProcessorTest {
     void limit() {
         var seq = new SequentialMutationProcessor(
                 compilationUnit -> STRINGS.stream()
-                                          .map(MutatedMethod::new)
+                                          .map(s -> MutatedMethod.from("v", s, 0))
                                           .collect(Collectors.toList()),
                 2);
 
