@@ -81,7 +81,7 @@ public class MutationGenerator {
                                                   .toString()
                                                   .replace(".java", "");
         for (var mutator : mutators) {
-            final List<String> mutations = mutator.process(unit);
+            final List<MutatedMethod> mutations = mutator.process(unit);
 
             final String dir = String.format("%s/%s/%s",
                                              outputDirectory.getPath(),
@@ -100,7 +100,7 @@ public class MutationGenerator {
                     var writer = new PrintWriter(String.format("%s/%d.java", dir, fileIndex),
                                                  StandardCharsets.UTF_8);
                     fileIndex++;
-                    writer.println(mutation);
+                    writer.println(mutation.getCode());
                     writer.close();
                 } catch (IOException e) {
                     e.printStackTrace();

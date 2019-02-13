@@ -22,15 +22,15 @@ class SequentialMutationProcessor implements MutationProcessor<CompilationUnit> 
     }
 
     @Override
-    public List<String> process(CompilationUnit compilationUnit) {
-        final ArrayList<String> mutations = new ArrayList<>();
+    public List<MutatedMethod> process(CompilationUnit compilationUnit) {
+        final ArrayList<MutatedMethod> mutations = new ArrayList<>();
 
         compilationUnit.accept(new VoidVisitorAdapter<Void>() {
             @Override
             public void visit(MethodDeclaration n, Void arg) {
                 super.visit(n, arg);
 
-                List<String> res = mutator.process(n);
+                List<MutatedMethod> res = mutator.process(n);
                 if (maxMutationsPerMethod > 0 && maxMutationsPerMethod < res.size()) {
                     Collections.shuffle(res);
                     res = res.stream().limit(maxMutationsPerMethod).collect(Collectors.toList());

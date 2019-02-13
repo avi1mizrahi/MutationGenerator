@@ -41,7 +41,10 @@ abstract class MutatorTest {
 
     void checkExpectation(MutationsCase mutationsCase) {
         var processor = createProcessor();
-        var generatedMutations = Set.copyOf(processor.process(mutationsCase.orig));
+        var generatedMutations = processor.process(mutationsCase.orig)
+                                          .stream()
+                                          .map(MutatedMethod::getCode)
+                                          .collect(Collectors.toSet());
 
         assertEquals(mutationsCase.expected.size(), generatedMutations.size());
 

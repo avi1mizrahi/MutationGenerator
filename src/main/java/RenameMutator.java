@@ -34,8 +34,8 @@ public class RenameMutator implements MutationProcessor<MethodDeclaration> {
     }
 
     @Override
-    public List<String> process(MethodDeclaration method) {
-        List<String> mutations = new ArrayList<>();
+    public List<MutatedMethod> process(MethodDeclaration method) {
+        List<MutatedMethod> mutations = new ArrayList<>();
 
         final List<SimpleName> allNames = method.findAll(NameExpr.class)
                                                 .stream()
@@ -55,7 +55,7 @@ public class RenameMutator implements MutationProcessor<MethodDeclaration> {
                 declarator.setName(suggestedName);
                 renameAll(allNames, oldName, suggestedName);
 
-                mutations.add(method.toString());
+                mutations.add(MutatedMethod.from(method));
 
                 renameAll(allNames, suggestedName, oldName);
                 declarator.setName(oldName);
@@ -65,7 +65,7 @@ public class RenameMutator implements MutationProcessor<MethodDeclaration> {
         return mutations;
     }
 
-    static <T> Predicate<T> not(Predicate<T> t) {
+    private static <T> Predicate<T> not(Predicate<T> t) {
         return t.negate();
     }
 }

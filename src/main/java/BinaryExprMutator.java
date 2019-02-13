@@ -57,8 +57,8 @@ public class BinaryExprMutator implements MutationProcessor<MethodDeclaration> {
     }
 
     @Override
-    public List<String> process(MethodDeclaration method) {
-        List<String> mutations = new ArrayList<>();
+    public List<MutatedMethod> process(MethodDeclaration method) {
+        List<MutatedMethod> mutations = new ArrayList<>();
 
         method.accept(new Visitor(mutations, method), null);
 
@@ -66,13 +66,13 @@ public class BinaryExprMutator implements MutationProcessor<MethodDeclaration> {
     }
 
     private static class Visitor extends VoidVisitorAdapter<Void> {
-        private final List<String> mutations;
+        private final List<MutatedMethod> mutations;
         private final MethodDeclaration method;
         private boolean foundString = false;
         private static final List<String> probablyStrings = Arrays.asList(
                 "name", "string", "str", "doc", "comment", "desc", "title", "regex", "exp", "msg", "message");
 
-        Visitor(List<String> mutations, MethodDeclaration method) {
+        Visitor(List<MutatedMethod> mutations, MethodDeclaration method) {
             this.mutations = mutations;
             this.method = method;
         }
@@ -111,7 +111,7 @@ public class BinaryExprMutator implements MutationProcessor<MethodDeclaration> {
             n.setRight(left);
             flipComparator(n);
 
-            mutations.add(method.toString());
+            mutations.add(MutatedMethod.from(method));
 
             n.setLeft(left);
             n.setRight(right);

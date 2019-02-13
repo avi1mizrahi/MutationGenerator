@@ -7,15 +7,15 @@ import java.util.List;
 
 public class LiteralMutator implements MutationProcessor<MethodDeclaration> {
     @Override
-    public List<String> process(MethodDeclaration method) {
-        List<String> mutations = new ArrayList<>();
+    public List<MutatedMethod> process(MethodDeclaration method) {
+        List<MutatedMethod> mutations = new ArrayList<>();
 
         method.accept(new VoidVisitorAdapter<Void>() {
             @Override
             public void visit(IntegerLiteralExpr n, Void arg) {
                 var old = n.asInt();// TODO: there is a bug here I think. Try parsing big int
                 n.setInt(404040404);
-                mutations.add(method.toString());
+                mutations.add(MutatedMethod.from(method));
                 n.setInt(old);
             }
         }, null);
