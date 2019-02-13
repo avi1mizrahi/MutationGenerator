@@ -96,9 +96,11 @@ public class MutationGenerator {
 
             for (var mutation : mutations) {
                 try {
-                    var writer = new PrintWriter(String.format("%s/%s_%d.java",
+                    var writer = new PrintWriter(String.format("%s/%s_%d_%d_%d.java",
                                                                dir,
                                                                mutation.getMethodName(),
+                                                               mutation.getPosition().line,
+                                                               mutation.getPosition().column,
                                                                mutation.getIndex()),
                                                  StandardCharsets.UTF_8);
                     writer.println(mutation.getCode());

@@ -29,7 +29,7 @@ class SequentialMutationProcessorTest {
     void process() {
         var seq = new SequentialMutationProcessor(
                 compilationUnit -> STRINGS.stream()
-                                          .map(s -> MutatedMethod.from("v", s, 0))
+                                          .map(s -> MutatedMethod.from("v", s))
                                           .collect(Collectors.toList()));
 
         List<MutatedMethod> res = seq.process(unit);
@@ -45,7 +45,7 @@ class SequentialMutationProcessorTest {
     void limit() {
         var seq = new SequentialMutationProcessor(
                 compilationUnit -> STRINGS.stream()
-                                          .map(s -> MutatedMethod.from("v", s, 0))
+                                          .map(s -> MutatedMethod.from("v", s))
                                           .collect(Collectors.toList()),
                 2);
 
