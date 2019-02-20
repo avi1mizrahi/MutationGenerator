@@ -21,6 +21,13 @@ class SequentialMutationProcessor implements MutationProcessor<CompilationUnit> 
         this.maxMutationsPerMethod = maxMutationsPerMethod;
     }
 
+    static void index(List<MutatedMethod> mutations) {
+        int i = 0;
+        for (MutatedMethod mutation : mutations) {
+            mutation.setIndex(++i);
+        }
+    }
+
     @Override
     public List<MutatedMethod> process(CompilationUnit compilationUnit) {
         final ArrayList<MutatedMethod> mutations = new ArrayList<>();
@@ -31,6 +38,7 @@ class SequentialMutationProcessor implements MutationProcessor<CompilationUnit> 
                 super.visit(n, arg);
 
                 List<MutatedMethod> res = mutator.process(n);
+                index(res);
                 if (maxMutationsPerMethod > 0 && maxMutationsPerMethod < res.size()) {
                     Collections.shuffle(res);
                     res = res.stream().limit(maxMutationsPerMethod).collect(Collectors.toList());

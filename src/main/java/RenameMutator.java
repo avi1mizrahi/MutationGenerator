@@ -43,7 +43,6 @@ public class RenameMutator implements MutationProcessor<MethodDeclaration> {
                                                 .map(NameExpr::getName)
                                                 .collect(Collectors.toList());
 
-        AtomicInteger index = new AtomicInteger();
         for (var declarator : method.findAll(VariableDeclarator.class)) {
 
             nameGenerator.generateNames(declarator.getNameAsString())
@@ -57,7 +56,7 @@ public class RenameMutator implements MutationProcessor<MethodDeclaration> {
                 declarator.setName(suggestedName);
                 renameAll(allNames, oldName, suggestedName);
 
-                mutations.add(MutatedMethod.from(method, index.incrementAndGet()));
+                mutations.add(MutatedMethod.from(method));
 
                 renameAll(allNames, suggestedName, oldName);
                 declarator.setName(oldName);
