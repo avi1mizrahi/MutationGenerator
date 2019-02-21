@@ -57,8 +57,6 @@ class MutationGeneratorTest {
 
     @Test
     void test() {
-    // TODO: two executions, until the bug will be fixed
-    //  (that the mutations should not be used together)
         assertDoesNotThrow(() ->
                 MutationGenerator.main(new String[]{
                         "--num-threads", "1",
@@ -77,8 +75,34 @@ class MutationGeneratorTest {
                 }));
 
         assertDoesNotThrow(() ->
-                assertDirectoriesEqual(Paths.get(OUTPUT_DIR), Paths.get(EXPECTED_OUTPUT_DIR)));
+                assertDirectoriesEqual(Paths.get(OUTPUT_DIR), Paths.get(EXPECTED_OUTPUT_DIR + "/basic")));
     }
+
+    @Test
+    void outputOriginal() {
+        assertDoesNotThrow(() ->
+                MutationGenerator.main(new String[]{
+                        "--num-threads", "1",
+                        "--input-dir", INPUT_DIR,
+                        "--output-dir", OUTPUT_DIR,
+                        "--output-original",
+                        "--flip-binary-expr"
+                }));
+
+        assertDoesNotThrow(() ->
+                MutationGenerator.main(new String[]{
+                        "--num-threads", "1",
+                        "--input-dir", INPUT_DIR,
+                        "--output-dir", OUTPUT_DIR,
+                        "--output-original",
+                        "--rename-variable",
+                        "--num-similarities", "2"
+                }));
+
+        assertDoesNotThrow(() ->
+                assertDirectoriesEqual(Paths.get(OUTPUT_DIR), Paths.get(EXPECTED_OUTPUT_DIR + "/outputOriginal")));
+    }
+
     @Test
     void testWithCache() {
         assertDoesNotThrow(() ->
@@ -100,6 +124,6 @@ class MutationGeneratorTest {
                }));
 
         assertDoesNotThrow(() -> assertDirectoriesEqual(Paths.get(OUTPUT_DIR),
-                                                        Paths.get(EXPECTED_OUTPUT_DIR)));
+                                                        Paths.get(EXPECTED_OUTPUT_DIR + "/basic")));
     }
 }

@@ -9,8 +9,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 class SequentialMutationProcessorTest {
     private static final List<String>    STRINGS = Arrays.asList("Hi",
@@ -47,6 +46,7 @@ class SequentialMutationProcessorTest {
                 compilationUnit -> STRINGS.stream()
                                           .map(s -> MutatedMethod.from("v", s))
                                           .collect(Collectors.toList()),
+                false,
                 2);
 
         List<MutatedMethod> res = seq.process(unit);
@@ -56,8 +56,28 @@ class SequentialMutationProcessorTest {
     }
 
     @Test
+    void outputOriginal() {
+        var seq = new SequentialMutationProcessor(
+                compilationUnit -> STRINGS.stream()
+                                          .map(s -> MutatedMethod.from("v", s))
+                                          .collect(Collectors.toList()),
+                true,
+                2);
+
+        List<MutatedMethod> res = seq.process(unit);
+
+        assertEquals(3, res.size());
+        int i = res.indexOf(MutatedMethod.from("v", "void v() {\n}"));
+        assertNotEquals(-1, i);
+        MutatedMethod code = res.remove(i);
+        assertTrue(Set.copyOf(STRINGS).containsAll(toListOfCodeString(res)));
+    }
+
+    @Test
     void limit_empty() {
-        var seq = new SequentialMutationProcessor(compilationUnit -> new ArrayList<>(), 2);
+        var seq = new SequentialMutationProcessor(compilationUnit -> new ArrayList<>(),
+                                                  false,
+                                                  2);
 
         List<MutatedMethod> res = seq.process(unit);
 

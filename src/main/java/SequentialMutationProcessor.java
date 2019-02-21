@@ -9,15 +9,19 @@ import java.util.stream.Collectors;
 
 class SequentialMutationProcessor implements MutationProcessor<CompilationUnit> {
     private final MutationProcessor<MethodDeclaration> mutator;
-    private final int                                  maxMutationsPerMethod;
+
+    private final boolean outputOriginalMethod;
+    private final int     maxMutationsPerMethod;
 
     SequentialMutationProcessor(MutationProcessor<MethodDeclaration> mutator) {
-        this(mutator, 0);
+        this(mutator, false, 0);
     }
 
     SequentialMutationProcessor(MutationProcessor<MethodDeclaration> mutator,
+                                boolean outputOriginalMethod,
                                 int maxMutationsPerMethod) {
         this.mutator = mutator;
+        this.outputOriginalMethod = outputOriginalMethod;
         this.maxMutationsPerMethod = maxMutationsPerMethod;
     }
 
@@ -42,6 +46,9 @@ class SequentialMutationProcessor implements MutationProcessor<CompilationUnit> 
                 if (maxMutationsPerMethod > 0 && maxMutationsPerMethod < res.size()) {
                     Collections.shuffle(res);
                     res = res.stream().limit(maxMutationsPerMethod).collect(Collectors.toList());
+                }
+                if (outputOriginalMethod) {
+                    res.add(MutatedMethod.from(n));
                 }
 
                 mutations.addAll(res);

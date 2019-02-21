@@ -31,6 +31,7 @@ public class MutationGenerator {
 
         if (parameters.flipBinaryExpr) {
             mutators.add(new SequentialMutationProcessor(new BinaryExprMutator(),
+                                                         parameters.outputOriginal,
                                                          parameters.maxMutationsPerMethod));
         }
         if (parameters.renameVariable) {
@@ -45,6 +46,7 @@ public class MutationGenerator {
                 nameGenerator = new NameGeneratorCache(nameGenerator, parameters.renameCacheSize);
             }
             mutators.add(new SequentialMutationProcessor(new RenameMutator(nameGenerator),
+                                                         parameters.outputOriginal,
                                                          parameters.maxMutationsPerMethod));
         }
 

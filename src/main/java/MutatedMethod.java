@@ -11,8 +11,7 @@ class MutatedMethod {
     private final String   methodName;
     private final String   code;
     private final Position position;
-
-    private int index = 0;
+    private       int      index = 0;
 
     MutatedMethod(String methodName, String code, Position position) {
         this.code = code;
@@ -49,5 +48,11 @@ class MutatedMethod {
 
     public Position getPosition() {
         return position;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof MutatedMethod &&
+                ((MutatedMethod) obj).code.equals(this.code);
     }
 }
