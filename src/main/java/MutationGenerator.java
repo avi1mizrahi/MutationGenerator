@@ -53,7 +53,7 @@ public class MutationGenerator {
         final ExecutorService threadPool = Executors.newFixedThreadPool(parameters.numThreads);
         final Path inputDir = parameters.inputDirectory.toPath();
         Files.find(inputDir,
-                   4,
+                   parameters.maxDepth,
                    (path, basicFileAttributes) ->
                            basicFileAttributes.isRegularFile() &&
                                    path.toString().endsWith(".java"))

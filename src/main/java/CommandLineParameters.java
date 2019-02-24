@@ -38,6 +38,9 @@ class CommandLineParameters {
     @Option(name = "--num-similarities", depends = "--rename-variable", usage = "number of similarities to find for each word")
     public int numSimilarities = 3;
 
+    @Option(name = "--max-depth", usage = "Max depth din filesystem to search java files")
+    public int maxDepth = Integer.MAX_VALUE;
+
     @Option(name = "--num-threads")
     public int numThreads = 8;
 
