@@ -7,6 +7,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashSet;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -28,6 +30,9 @@ class MutationGeneratorTest {
     }
 
     static void assertDirectoriesEqual(Path dir1, Path dir2) throws IOException {
+        Set<Path> paths1 = new HashSet<>();
+        Set<Path> paths2 = new HashSet<>();
+
         try (var s1 = Files.walk(dir1);
              var s2 = Files.walk(dir2)) {
 
@@ -37,22 +42,26 @@ class MutationGeneratorTest {
             i1.next(); i2.next();//skip the root
 
             while (i1.hasNext() && i2.hasNext()) {
-                var p1 = i1.next();
-                var p2 = i2.next();
+                paths1.add(dir1.relativize(i1.next()));
+                paths2.add(dir2.relativize(i2.next()));
+            }
+        }
 
-                assertEquals(p1.getFileName(), p2.getFileName());
+        for (var path : paths1) {
+            assertTrue(paths2.remove(path), path.toString());
 
-                if (p1.toFile().isDirectory()) {
-                    assertTrue(p2.toFile().isDirectory());
-                    continue;
-                }
+            Path file1 = dir1.resolve(path);
+            Path file2 = dir2.resolve(path);
 
-                assertArrayEquals(Files.readAllBytes(p1), Files.readAllBytes(p2));
+            if (file1.toFile().isDirectory()) {
+                assertTrue(file2.toFile().isDirectory());
+                continue;
             }
 
-            assertFalse(i1.hasNext());
-            assertFalse(i2.hasNext());
+            assertArrayEquals(Files.readAllBytes(file1), Files.readAllBytes(file2));
         }
+
+        assertTrue(paths2.isEmpty(), () -> paths2.iterator().next().toString());
     }
 
     @Test
@@ -72,6 +81,14 @@ class MutationGeneratorTest {
                         "--output-dir", OUTPUT_DIR,
                         "--rename-variable",
                         "--num-similarities", "2"
+                }));
+
+        assertDoesNotThrow(() ->
+               MutationGenerator.main(new String[]{
+                        "--num-threads", "1",
+                        "--input-dir", INPUT_DIR,
+                        "--output-dir", OUTPUT_DIR,
+                        "--invert-if-else"
                 }));
 
         assertDoesNotThrow(() ->
@@ -100,6 +117,15 @@ class MutationGeneratorTest {
                 }));
 
         assertDoesNotThrow(() ->
+               MutationGenerator.main(new String[]{
+                        "--num-threads", "1",
+                        "--input-dir", INPUT_DIR,
+                        "--output-dir", OUTPUT_DIR,
+                       "--output-original",
+                        "--invert-if-else"
+                }));
+
+        assertDoesNotThrow(() ->
                 assertDirectoriesEqual(Paths.get(OUTPUT_DIR), Paths.get(EXPECTED_OUTPUT_DIR + "/outputOriginal")));
     }
 
@@ -122,6 +148,14 @@ class MutationGeneratorTest {
                        "--rename-cache-size", "3",
                        "--num-similarities", "2"
                }));
+
+        assertDoesNotThrow(() ->
+               MutationGenerator.main(new String[]{
+                        "--num-threads", "1",
+                        "--input-dir", INPUT_DIR,
+                        "--output-dir", OUTPUT_DIR,
+                        "--invert-if-else"
+                }));
 
         assertDoesNotThrow(() -> assertDirectoriesEqual(Paths.get(OUTPUT_DIR),
                                                         Paths.get(EXPECTED_OUTPUT_DIR + "/basic")));

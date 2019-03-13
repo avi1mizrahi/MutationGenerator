@@ -34,6 +34,11 @@ public class MutationGenerator {
                                                          parameters.outputOriginal,
                                                          parameters.maxMutationsPerMethod));
         }
+        if (parameters.invertIfElse) {
+            mutators.add(new SequentialMutationProcessor(new IfElseMutator(),
+                                                         parameters.outputOriginal,
+                                                         parameters.maxMutationsPerMethod));
+        }
         if (parameters.renameVariable) {
             NameGenerator nameGenerator;
             if (parameters.word2vecMap != null) {

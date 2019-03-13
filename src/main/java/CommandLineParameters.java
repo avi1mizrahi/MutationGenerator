@@ -26,6 +26,9 @@ class CommandLineParameters {
     @Option(name = "--flip-binary-expr", usage = "Flips binary expressions. \nExamples:\n 'obj + elm' -> 'elm + obj'\n 'obj <= elm' -> 'elm >= obj', ")
     public boolean flipBinaryExpr = false;
 
+    @Option(name = "--invert-if-else", usage = "negate if condition and invert 'then' with 'else'")
+    public boolean invertIfElse = false;
+
     @Option(name = "--rename-variable", usage = "Rename local variable")
     public boolean renameVariable = false;
 
@@ -72,12 +75,19 @@ class CommandLineParameters {
         if (numThreads < 1) error("Don't be funny, --num-threads must be positive");
     }
 
+    static private int boolToInt(boolean bool) {
+        return bool ? 1 : 0;
+    }
+
     private void checkMutations() throws CmdLineException {
-        if (!flipBinaryExpr && !renameVariable) {
+        if (!flipBinaryExpr && !renameVariable && !invertIfElse) {
             error("No mutation was chosen");
         }
 
-        if (flipBinaryExpr && renameVariable) {//TODO fixme
+        if (1 <
+                boolToInt(flipBinaryExpr) +
+                boolToInt(renameVariable) +
+                boolToInt(invertIfElse)) {//TODO fixme
             error("Forbidden due to a known bug");
         }
 
