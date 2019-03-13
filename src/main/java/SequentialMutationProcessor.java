@@ -25,7 +25,7 @@ class SequentialMutationProcessor implements MutationProcessor<CompilationUnit> 
         this.maxMutationsPerMethod = maxMutationsPerMethod;
     }
 
-    static void index(List<MutatedMethod> mutations) {
+    private static void index(List<MutatedMethod> mutations) {
         int i = 0;
         for (MutatedMethod mutation : mutations) {
             mutation.setIndex(++i);
