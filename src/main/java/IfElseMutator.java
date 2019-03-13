@@ -6,8 +6,13 @@ import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class IfElseMutator implements MutationProcessor<MethodDeclaration> {
+    private static void invertComparator(BinaryExpr binaryExpr) {
+        binaryExpr.setOperator(Objects.requireNonNull(BinaryExpOps.getNegatedComparator(binaryExpr.getOperator())));
+    }
+
     @Override
     public List<MutatedMethod> process(MethodDeclaration method) {
         List<MutatedMethod> mutations = new ArrayList<>();
@@ -17,15 +22,13 @@ public class IfElseMutator implements MutationProcessor<MethodDeclaration> {
             public void visit(IfStmt n, Void arg) {
                 n.getCondition().ifBinaryExpr(binaryExpr -> {
                     final BinaryExpr.Operator op = binaryExpr.getOperator();
-                    if ((op == BinaryExpr.Operator.NOT_EQUALS || op == BinaryExpr.Operator.EQUALS)
-                            && n.getElseStmt().isPresent()) {
+                    if (BinaryExpOps.isComparison(op) && n.getElseStmt().isPresent()) {
                         Statement thenStmt = n.getThenStmt().clone();
                         Statement elseStmt = n.getElseStmt().get().clone();
                         n.setThenStmt(elseStmt);
                         n.setElseStmt(thenStmt);
-                        binaryExpr.setOperator(op == BinaryExpr.Operator.EQUALS ?
-                                                       BinaryExpr.Operator.NOT_EQUALS :
-                                                       BinaryExpr.Operator.EQUALS);
+
+                        invertComparator(binaryExpr);
 
                         mutations.add(MutatedMethod.from(method));
 
