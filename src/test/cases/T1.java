@@ -16,6 +16,8 @@ public class TEST {
             b = 333;
         }
 
+        while (b < a) b++;
+
         return 5;
     }
 }

@@ -39,6 +39,11 @@ public class MutationGenerator {
                                                          parameters.outputOriginal,
                                                          parameters.maxMutationsPerMethod));
         }
+        if (parameters.whileToFor) {
+            mutators.add(new SequentialMutationProcessor(new WhileToForMutator(),
+                                                         parameters.outputOriginal,
+                                                         parameters.maxMutationsPerMethod));
+        }
         if (parameters.renameVariable) {
             NameGenerator nameGenerator;
             if (parameters.word2vecMap != null) {

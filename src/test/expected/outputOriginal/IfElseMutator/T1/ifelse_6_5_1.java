@@ -10,5 +10,6 @@ public int ifelse(int a, int b) {
         a = 321;
         b = 333;
     }
+    while (b < a) b++;
     return 5;
 }

@@ -3,12 +3,12 @@ public int ifelse(int a, int b) {
         return b;
     } else
         return 3 + a;
-    if (34 != b)
+    if (b != 34)
         b = 32;
     else {
         a = 321;
         b = 333;
     }
-    while (b < a) b++;
+    while (a > b) b++;
     return 5;
 }

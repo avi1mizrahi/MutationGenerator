@@ -8,5 +8,6 @@ public int ifelse(int a, int b) {
         b = 333;
     } else
         b = 32;
+    while (b < a) b++;
     return 5;
 }

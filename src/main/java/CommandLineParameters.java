@@ -29,6 +29,9 @@ class CommandLineParameters {
     @Option(name = "--invert-if-else", usage = "negate if condition and invert 'then' with 'else'")
     public boolean invertIfElse = false;
 
+    @Option(name = "--while-to-for", usage = "replace while loop with for loop")
+    public boolean whileToFor = false;
+
     @Option(name = "--rename-variable", usage = "Rename local variable")
     public boolean renameVariable = false;
 
@@ -80,14 +83,16 @@ class CommandLineParameters {
     }
 
     private void checkMutations() throws CmdLineException {
-        if (!flipBinaryExpr && !renameVariable && !invertIfElse) {
+        int numMutations = boolToInt(flipBinaryExpr) +
+                           boolToInt(renameVariable) +
+                           boolToInt(whileToFor) +
+                           boolToInt(invertIfElse);
+
+        if (numMutations == 0) {
             error("No mutation was chosen");
         }
 
-        if (1 <
-                boolToInt(flipBinaryExpr) +
-                boolToInt(renameVariable) +
-                boolToInt(invertIfElse)) {//TODO fixme
+        if (numMutations > 1) {//TODO fixme
             error("Forbidden due to a known bug");
         }
 
