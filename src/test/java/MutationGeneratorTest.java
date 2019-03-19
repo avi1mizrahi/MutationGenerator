@@ -58,7 +58,9 @@ class MutationGeneratorTest {
                 continue;
             }
 
-            assertArrayEquals(Files.readAllBytes(file1), Files.readAllBytes(file2));
+            assertArrayEquals(Files.readAllBytes(file1),
+                              Files.readAllBytes(file2),
+                              () -> "Difference:\nfile1:" + file1 + "\nfile2:" + file2 + '\n');
         }
 
         assertTrue(paths2.isEmpty(), () -> paths2.iterator().next().toString());
