@@ -47,6 +47,7 @@ class SequentialMutationProcessorTest {
                                           .map(s -> MutatedMethod.from("v", s))
                                           .collect(Collectors.toList()),
                 false,
+                false,
                 2);
 
         List<MutatedMethod> res = seq.process(unit);
@@ -62,6 +63,54 @@ class SequentialMutationProcessorTest {
                                           .map(s -> MutatedMethod.from("v", s))
                                           .collect(Collectors.toList()),
                 true,
+                false,
+                2);
+
+        List<MutatedMethod> res = seq.process(unit);
+
+        assertEquals(3, res.size());
+        int i = res.indexOf(MutatedMethod.from("v", "void v() {\n}"));
+        assertNotEquals(-1, i);
+        MutatedMethod code = res.remove(i);
+        assertTrue(Set.copyOf(STRINGS).containsAll(toListOfCodeString(res)));
+    }
+
+    @Test
+    void outputOriginalWhenEmpty() {
+        var seq = new SequentialMutationProcessor(
+                compilationUnit -> new ArrayList<>(),
+                true,
+                false,
+                2);
+
+        List<MutatedMethod> res = seq.process(unit);
+
+        assertEquals(1, res.size());
+        int i = res.indexOf(MutatedMethod.from("v", "void v() {\n}"));
+        assertNotEquals(-1, i);
+    }
+
+    @Test
+    void outputOriginalIfEmptyWhenEmpty() {
+        var seq = new SequentialMutationProcessor(
+                compilationUnit -> List.of(),
+                true,
+                true,
+                2);
+
+        List<MutatedMethod> res = seq.process(unit);
+
+        assertTrue(res.isEmpty());
+    }
+
+    @Test
+    void outputOriginalIfEmptyWhenNotEmpty() {
+        var seq = new SequentialMutationProcessor(
+                compilationUnit -> STRINGS.stream()
+                                          .map(s -> MutatedMethod.from("v", s))
+                                          .collect(Collectors.toList()),
+                true,
+                true,
                 2);
 
         List<MutatedMethod> res = seq.process(unit);
@@ -76,6 +125,7 @@ class SequentialMutationProcessorTest {
     @Test
     void limit_empty() {
         var seq = new SequentialMutationProcessor(compilationUnit -> new ArrayList<>(),
+                                                  false,
                                                   false,
                                                   2);
 

@@ -11,17 +11,19 @@ class SequentialMutationProcessor implements MutationProcessor<CompilationUnit> 
     private final MutationProcessor<MethodDeclaration> mutator;
 
     private final boolean outputOriginalMethod;
+    private final boolean skipOriginalIfEmpty;
     private final int     maxMutationsPerMethod;
 
     SequentialMutationProcessor(MutationProcessor<MethodDeclaration> mutator) {
-        this(mutator, false, 0);
+        this(mutator, false, false, 0);
     }
 
     SequentialMutationProcessor(MutationProcessor<MethodDeclaration> mutator,
                                 boolean outputOriginalMethod,
-                                int maxMutationsPerMethod) {
+                                boolean skipOriginalIfEmpty, int maxMutationsPerMethod) {
         this.mutator = mutator;
         this.outputOriginalMethod = outputOriginalMethod;
+        this.skipOriginalIfEmpty = skipOriginalIfEmpty;
         this.maxMutationsPerMethod = maxMutationsPerMethod;
     }
 
@@ -47,7 +49,7 @@ class SequentialMutationProcessor implements MutationProcessor<CompilationUnit> 
                     Collections.shuffle(res);
                     res = res.stream().limit(maxMutationsPerMethod).collect(Collectors.toList());
                 }
-                if (outputOriginalMethod) {
+                if (outputOriginalMethod && !(skipOriginalIfEmpty && res.isEmpty())) {
                     res.add(MutatedMethod.from(n));
                 }
 

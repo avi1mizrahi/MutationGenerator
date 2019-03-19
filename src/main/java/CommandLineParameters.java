@@ -23,6 +23,9 @@ class CommandLineParameters {
     @Option(name = "--output-original", usage = "also output the original method")
     public boolean outputOriginal = false;
 
+    @Option(name = "--output-original-if-mutated", usage = "also output the original method only if at least one mutation was generated")
+    public boolean outputOriginalIfMutated = false;
+
     @Option(name = "--flip-binary-expr", usage = "Flips binary expressions. \nExamples:\n 'obj + elm' -> 'elm + obj'\n 'obj <= elm' -> 'elm >= obj', ")
     public boolean flipBinaryExpr = false;
 
