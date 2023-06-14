@@ -1,4 +1,6 @@
 # MutationGenerator
+Generate mutations for Java code.
+
 ### Clone
 ```
 git clone https://github.com/avi1mizrahi/MutationGenerator.git
